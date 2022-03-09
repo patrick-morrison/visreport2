@@ -1,0 +1,188 @@
+{% extends 'report/base.html' %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"
+        charset="utf-8"></script>
+</head>
+
+<style>
+    html {
+        height: 100%;
+    }
+
+    body {
+        height: calc(100% - 56px);
+    }
+
+    #map {
+        height: 100%;
+    }
+
+    .leaflet-tooltip-pane .label {
+        color: white;
+        font-weight: bolder;
+        font-style: italic;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        font-size: 1.1em font-family: "Arial Narrow", sans-serif;
+    }
+
+    .leaflet-popup-tip,
+    .leaflet-popup-content-wrapper {
+        background: #292b2c;
+        color: white;
+        font-size: 1.3em;
+        border-right: 15px solid transparent;
+    }
+
+    .legend {
+        padding: 3px 3px;
+        font: 12px Arial, Helvetica, sans-serif;
+        background: white;
+        background: rgba(255, 255, 255, 0.3);
+        /*box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);*/
+        /*border-radius: 5px;*/
+        line-height: 22px;
+        color: #292b2c;
+    }
+
+    .legend h4 {
+        text-align: left;
+        font-size: 14px;
+        margin: 2px 3px 3px;
+        color: #292b2c;
+    }
+
+    .legend span {
+        position: relative;
+        bottom: 3px;
+    }
+
+    .legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin: 0 8px 0 0;
+        opacity: 0.9;
+    }
+
+    .legend i.icon {
+        background-size: 18px;
+        background-color: rgba(255, 255, 255, 1);
+    }
+</style>
+<div id="map"></div>
+
+<script>
+    var map = L.map('map', {
+        tap: false,
+        renderer: L.canvas({ tolerance: 12 })
+    }).setView([-31, 115], 7);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 18
+    }).addTo(map);
+
+
+    function getColor(v) {
+        return v > 15.9 ? '#0275d8' :
+            v > 7.9 ? '#5cb85c' :
+                v > 2.9 ? '#f0ad4e' :
+                    v > 0.1 ? '#d9534f' :
+                        '#868e96';
+    }
+    var legend = L.control({ position: "bottomleft" });
+
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create("div", "legend");
+        //div.innerHTML += "<h4>Scale</h4>";
+        div.innerHTML += '<i style="background: #d9534f"></i><span>&lt; 3 m</span><br>';
+        div.innerHTML += '<i style="background: #f0ad4e"></i><span>3-8m</span><br>';
+        div.innerHTML += '<i style="background: #5cb85c"></i><span>8-15m</span><br>';
+        div.innerHTML += '<i style="background: #0275d8"></i><span>15-25m</span><br>';
+        div.innerHTML += '<i style="background: #868e96"></i><span>No recent</span><br>';
+        return div;
+    };
+    legend.addTo(map);
+
+    function geojsonMarkerOptions(feature) {
+        if (feature.properties.last_report.recent == 'True') {
+            return {
+                radius: 16,
+                fillColor: getColor(feature.properties.last_report.visibility),
+                color: "white",
+                weight: 0,
+                opacity: .9,
+                fillOpacity: 1,
+            };
+        } else {
+            return {
+                radius: 16,
+                fillColor: getColor(feature.properties.last_report.visibility),
+                color: "#000",
+                weight: 1,
+                opacity: 0.1,
+                fillOpacity: 0.3,
+            };
+        }
+    }
+
+    function visText(report) {
+        if (report.recent == 'True') {
+            return "<p style = 'color:" + getColor(report.visibility) + ";'>" +
+                report.visibility + "m vis " + report.since + ".</p>"
+        } else {
+            return "<p> No recent reports.</p>"
+        }
+    }
+
+    function popupText(layer) {
+        return "<a style='line-height: .6; color:white; text-decoration: none;' href ='" + layer.feature.id + "'>" +
+            "<h5><i>" + layer.feature.properties.name + "</i></h5>" +
+            visText(layer.feature.properties.last_report) +
+            "<p style = 'color:#777d80'><small>Click here for more.</small></p></a>"
+    }
+
+    var sites = new L.geoJSON("", {
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, geojsonMarkerOptions(feature));
+    }, onEachFeature: function (feature, layer) {
+        layer.bindPopup(popupText,{ maxWidth: 230, className: 'text', closeOnClick: true, closeButton: false, direction: 'top',});
+        layer.bindTooltip(function (layer) {return layer.feature.id;},{direction: 'center', className: 'label', permanent: 'true'} );
+    }});
+
+    sites.addTo(map);
+    L.control.locate({
+        locateOptions: {
+            maxZoom: 14,
+            enableHighAccuracy: true
+        }
+    }).addTo(map);
+
+    $.ajax({
+        dataType: "json",
+        url: "{% url 'sites_geojson'%}",
+        success: function (data) {
+            $(data.features).each(function (key, data) {
+                sites.addData(data);
+            });
+        }
+    }).error(function () { });
+
+    sites.on("data:loaded",function(){
+      map.openTooltip();
+});
+
+</script>
+
+{% endblock %}

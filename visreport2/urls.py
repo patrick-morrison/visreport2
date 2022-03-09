@@ -14,8 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from report import views
+from report.models import Site
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.home, name = 'home'),
+    path('map', views.map, name = 'map'),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('sites.geojson', views.sites_geojson.as_view(),name='sites_geojson'),
 ]
