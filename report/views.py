@@ -10,7 +10,7 @@ def home(request):
 def map(request):
     return render(request, 'report/map.html')
 
-class sites_geojson(GeoJSONLayerView):
+class sites_display_geojson(GeoJSONLayerView):
     model = Site
     precision = 4
     geometry_field = 'location'

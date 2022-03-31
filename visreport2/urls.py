@@ -23,5 +23,5 @@ urlpatterns = [
     path('', views.home, name = 'home'),
     path('map', views.map, name = 'map'),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('sites.geojson', views.sites_geojson.as_view(),name='sites_geojson'),
+    path('sites_display.geojson', views.sites_display_geojson.as_view(),name='sites_display_geojson'),
 ]

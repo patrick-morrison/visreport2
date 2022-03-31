@@ -139,8 +139,9 @@
 
     function visText(report) {
         if (report.recent == 'True') {
-            return "<p style = 'color:" + getColor(report.visibility) + ";'>" +
-                report.visibility + "m vis " + report.since + ".</p>"
+            return "<span style = 'color:" + getColor(report.visibility) + ";'>" +
+                "<u>" + report.since + "</u></br>" +
+                report.visibility + "m" +  " reported  by @" + report.username + "</span>"
         } else {
             return "<p> No recent reports.</p>"
         }
@@ -171,7 +172,7 @@
 
     $.ajax({
         dataType: "json",
-        url: "{% url 'sites_geojson'%}",
+        url: "{% url 'sites_display_geojson'%}",
         success: function (data) {
             $(data.features).each(function (key, data) {
                 sites.addData(data);

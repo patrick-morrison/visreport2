@@ -33,9 +33,12 @@ class Site(models.Model):
     @property
     def last_report(self):
         try:
-            report = model_to_dict(Report.objects.filter(site=self.pk).latest('date'))
+            report = model_to_dict(Report.objects.filter(site=self.pk).latest('date'), fields={'date', 'visibility', 'user'})
+            report.update({'username': User.objects.get(id=report['user']).username})
+            report.pop('user')
             report.update({'recent': str(((timezone.now() - report['date']).days)<7)})
             report.update({'since': str(naturaltime(report['date']))})
+            report.pop('date')
             return report
         except:
             return {'recent' : 'None'}
