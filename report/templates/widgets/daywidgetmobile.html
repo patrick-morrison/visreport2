@@ -1,0 +1,25 @@
+
+    <div class="col-4 d-lg-none">
+        <labelclass="form-label">Date</label>
+        {% with widget=widget.subwidgets.0 %}
+            {% include widget.template_name %}
+        {% endwith %}
+    </div>
+    <div class="col-3 d-lg-none">
+        <labelclass="form-label d-none d-lg-table-cell">Time</label>
+        {% with widget=widget.subwidgets.1 %}
+            {% include widget.template_name %}
+        {% endwith %}
+    </div>
+
+
+    <div class="col-6 d-none d-lg-block">
+        {% with widget=widget.subwidgets.0 %}
+            {% include widget.template_name %}
+        {% endwith %}
+    </div>
+    <div class="col-6 d-none d-lg-block">
+        {% with widget=widget.subwidgets.1 %}
+            {% include widget.template_name %}
+        {% endwith %}
+    </div>

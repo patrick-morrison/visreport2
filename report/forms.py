@@ -3,7 +3,6 @@ from django import forms
 from datetime import datetime, timedelta, time
 
 class DateSelectorWidget(forms.MultiWidget):
-    template_name = 'widgets/daywidget.html'
     def __init__(self, attrs=None):
         today = datetime.strftime(datetime.now(), '%Y-%m-%d')
         yesterday = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
@@ -31,12 +30,15 @@ class DateSelectorWidget(forms.MultiWidget):
         context = self.get_context(name, value, attrs)
         return context['widget']['subwidgets']
 
+class DateSelectorWidgetMobile(DateSelectorWidget):
+    template_name = 'widgets/daywidgetmobile.html'
+
 class ReportForm(forms.ModelForm):
     class Meta:
         model = Report
         fields = ['date', 'conditions', 'visibility', 'comments']
         widgets = {
-            'date': DateSelectorWidget,
+            'date': DateSelectorWidgetMobile,
             'visibility': forms.NumberInput(attrs={'placeholder': '0-25m', 'min':0,'max':25}),
             'comments': forms.TextInput(attrs={'placeholder': 'Optional'})
         }

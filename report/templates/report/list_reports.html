@@ -1,0 +1,67 @@
+{% extends 'report/base.html' %}
+{% block content %}
+<div class = container style = "max-width:70em">
+    <br>
+
+    <h2>All {{object_list.count}} reports</h2>
+
+    <div class="table-responsive">
+
+        <table class="table table-borderless caption-top ">
+            <thead>
+              <tr>
+                <th scope="col">Date/Time</th>
+                <th scope="col">Site</th>
+                <th class="d-none d-lg-table-cell" scope="col">Visibility (m)</th>
+                <th class="d-lg-none" scope="col">Vis (m)</th>
+                <th scope="col">Conditions</th>
+                <th scope="col">Comment</th>
+                <th class="d-none d-lg-table-cell" scope="col">Reported by</th>
+                <th class="d-lg-none" scope="col">User</th>
+              </tr>
+              </tr>
+            </thead>
+            <tbody>
+        
+              {% for report in object_list %}
+              {%if report.visibility > 15.9%}
+              <tr class="table-primary">
+                {%elif report.visibility > 7.9%}
+              <tr class="table-success">
+                {%elif report.visibility > 2.9%}
+              <tr class="table-warning">
+                {%else%}
+              <tr class="table-danger">
+                {%endif%}
+                <th scope='row' class="d-none d-lg-table-cell" scope="col">{{report.date}}</th>
+                <th scope='row' class="d-lg-none" scope="col">{{ report.date|date:"j-M-y" }}   {{ report.date|time:"g a" }}</th>
+                <td><a style="color:black; text-decoration:none" onmouseover="style='text-decoration:underline'" onmouseout="style='text-decoration:none;color:black;'" href = "{%url 'detail_site' report.site.slug%}">{{report.site.name}} <small><i>({{report.site.slug}})</small></i></a></td>
+                <td>{{report.visibility }}</td>
+                <td>{{report.conditions }}</td>
+                <td>{%if report.comments%}{{report.comments }}{%else%}-{%endif%}
+
+                </td>
+                <td>@{{report.user}}
+                    {%if report.user.username == user.username%}
+                    <a href="javascript:
+                    {
+                        if (confirm('Delete report on {{report.date}}?')) {
+                            document.getElementById('delete-{{report.pk}}').submit()
+                          } 
+                    }" style='text-decoration: none;'>🗑️</a>
+                    <form id="delete-{{report.pk}}" method="POST" action="{% url 'delete_report' report.pk%}">
+                      {%csrf_token%}
+                      <input type="hidden">
+                    </form>
+                    {%endif%}
+                </td>
+              </tr>
+              {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+</div>
+
+{% endblock %}

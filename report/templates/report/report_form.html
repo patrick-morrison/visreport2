@@ -1,0 +1,37 @@
+<div class="card d-lg-none"> 
+    <h5 class="card-header">Contribute report</h5>
+    <div class="card-body">
+<form method = 'post', id = 'reportform'>
+    {%csrf_token%}
+    {% load widget_tweaks %}
+    <div class="row g-2">
+        {%render_field form.date class='form-control'%}
+        
+        <div class="col-5">
+            <labelclass="form-label">Visibility (m)</label>
+            {%render_field form.visibility class='form-control'%}
+        </div>
+      </div>
+      <div class="row g-2">
+        <div class="col-8">
+            <labelclass="form-label">Comments</label>
+        {%render_field form.comments class='form-control'%}
+    </div>
+    <div class="col-4">
+        <labelclass="form-label">Conditions</label>
+        {%render_field form.conditions class='form-control'%}
+    </div>
+
+      </div>
+      <br/>
+      <div class="row g-0">
+
+        <input class="btn btn-success btn-lg" type="submit" value="Add Report" />
+      </div>
+
+    </div>
+
+    
+  </form>
+
+</div>

@@ -26,9 +26,9 @@
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
     crossorigin="anonymous"></script>
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Navbar">
+  <nav class="navbar navbar-expand-lg navbar-dark" aria-label="Navbar" style="background-color: #505D7D">
     <div class="container">
-      <a class="navbar-brand" href="">Vis.Report</a>
+      <a class="navbar-brand" href="{%url 'home'%}">Vis.Report</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04"
         aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -37,13 +37,10 @@
       <div class="collapse navbar-collapse" id="navbarsExample04">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="">Sites</a>
+            <a class="nav-link active" aria-current="page" href="{%url 'list'%}">List View</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="">Reports</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active aria-current=" page" href="">About</a>
+            <a class="nav-link active aria-current=" page" href="{%url 'about'%}">About</a>
           </li>
         </ul>
         <ul class="navbar-nav">
@@ -54,7 +51,7 @@
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account_dropdown">
               <li><a class="dropdown-item" href="">Preferences</a></li>
               {% if user.is_superuser %}
-              <li><a class="dropdown-item" href="">Admin</a></li>
+              <li><a class="dropdown-item" href="{%url 'admin:index'%}">Admin</a></li>
               {% endif %}
               <div class="dropdown-divider"></div>
               <li><a class="dropdown-item" href="">Log out</a></li>

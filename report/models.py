@@ -44,7 +44,7 @@ class Site(models.Model):
             return {'recent' : 'None'}
     def reports(self):
         return Report.objects.filter(site=self.pk)
-    def nreport(self):
+    def nreports(self):
         return Report.objects.filter(site=self.pk).count()
 
 
@@ -73,3 +73,5 @@ class Report(models.Model):
 
     def __str__(self):
         return str(self.date.strftime("%Y-%m-%d-%H")) +"_"+ self.site.slug + "_by_"+ self.user.username
+    class Meta:
+        ordering = ('-date',)

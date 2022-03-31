@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from djgeojson.views import GeoJSONLayerView
+from django.urls import reverse_lazy
 from django.views import generic
 from django.views.generic.edit import FormMixin
 from .models import *
@@ -11,8 +12,8 @@ from .forms import *
 def home(request):
     return render(request, 'report/map.html')
 
-def map(request):
-    return render(request, 'report/map.html')
+def about(request):
+    return render(request, 'report/about.html')
 
 class detail_site(FormMixin, generic.DetailView):
     model = Site
@@ -30,7 +31,18 @@ class detail_site(FormMixin, generic.DetailView):
             report.visibility = filled_form.cleaned_data['visibility']
             report.user = request.user
             report.save()
-            return redirect('map')
+            return redirect('detail_site', self.site.slug)
+
+
+class list_reports(generic.ListView):
+    model = Report
+    template_name = "report/list_reports.html"
+
+
+class delete_report(generic.DeleteView):
+    model = Report
+    def get_success_url(self):
+        return reverse_lazy('detail_site', kwargs={'slug': self.object.site.slug})
 
 class sites_display_geojson(GeoJSONLayerView):
     model = Site
