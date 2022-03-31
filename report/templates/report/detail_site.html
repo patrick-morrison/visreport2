@@ -11,9 +11,9 @@
 <p>
 {%if site.link%}<a href="{{site.link}}" class="btn btn-light btn-sm" target="_blank">🔗 More info {{site.link_caption}}</a>{%endif%}
 </p>
-
+{% if user.is_authenticated %}
 {% include "report/report_form.html" %} 
-
+{% endif %}
 {% include "report/table.html" %} 
 
 

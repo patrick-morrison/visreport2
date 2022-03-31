@@ -31,7 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djgeojson',
-    'widget_tweaks'
+    'widget_tweaks',
+    'import_export',
 ]
 
 MIDDLEWARE = [
