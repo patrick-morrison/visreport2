@@ -49,7 +49,7 @@
             <a class="nav-link dropdown-toggle" href="#" id="account_dropdown" data-bs-toggle="dropdown"
               aria-expanded="false">Account</a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account_dropdown">
-              <li><a class="dropdown-item" href="{%url 'preferences'%}">Preferences</a></li>
+              <li><a class="dropdown-item" href="{%url 'account'%}">Account</a></li>
               {% if user.is_superuser %}
               <li><a class="dropdown-item" href="{%url 'admin:index'%}">Admin</a></li>
               {% endif %}

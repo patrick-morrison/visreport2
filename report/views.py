@@ -1,3 +1,4 @@
+from curses import REPORT_MOUSE_POSITION
 from django.shortcuts import get_object_or_404, render, redirect
 from djgeojson.views import GeoJSONLayerView
 from django.urls import reverse_lazy
@@ -67,16 +68,18 @@ class SignUp(generic.CreateView):
         login(self.request, user)
         return view
 
-def preferences(request):
+def account(request):
     form = PreferencesForm
     user = get_object_or_404(User, pk=request.user.pk)
+    reports = Report.objects.all().filter(user=user)
     if request.method == 'POST':
         filled_form = PreferencesForm(request.POST, instance=user)
         if filled_form.is_valid():
             filled_form.save()
-            return redirect('preferences')
-    return render(request, 'registration/preferences.html',
+            return redirect('account')
+    return render(request, 'registration/account.html',
      {'user': request.user,
+     'reports' : reports,
      'form' : form(initial={'email': user.email,
      'username':user.username},)
     })
