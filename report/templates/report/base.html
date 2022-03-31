@@ -49,18 +49,18 @@
             <a class="nav-link dropdown-toggle" href="#" id="account_dropdown" data-bs-toggle="dropdown"
               aria-expanded="false">Account</a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account_dropdown">
-              <li><a class="dropdown-item" href="">Preferences</a></li>
+              <li><a class="dropdown-item" href="{%url 'preferences'%}">Preferences</a></li>
               {% if user.is_superuser %}
               <li><a class="dropdown-item" href="{%url 'admin:index'%}">Admin</a></li>
               {% endif %}
               <div class="dropdown-divider"></div>
-              <li><a class="dropdown-item" href="">Log out</a></li>
+              <li><a class="dropdown-item" href="{%url 'logout'%}">Log out</a></li>
             </ul>
           </li>
           {% endif %}
           {% if user.is_authenticated == False %}
           <li class="nav-item">
-            <a class="btn btn-light" href="">Log in</a>
+            <a class="btn btn-light" href="{%url 'login'%}">Log in</a>
           </li>
           {% endif %}
         </ul>

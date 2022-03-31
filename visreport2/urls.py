@@ -27,4 +27,8 @@ urlpatterns = [
     path('reports/delete/<int:pk>', views.delete_report.as_view(), name = 'delete_report'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('sites_display.geojson', views.sites_display_geojson.as_view(),name='sites_display_geojson'),
+    # AUTH
+    path('accounts/signup', views.SignUp.as_view(), name = 'signup'),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('preferences/', views.preferences, name = 'preferences'),
 ]
