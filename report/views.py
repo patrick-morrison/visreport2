@@ -5,7 +5,7 @@ from .models import *
 # Create your views here.
 
 def home(request):
-    return render(request, 'report/home.html')
+    return render(request, 'report/map.html')
 
 def map(request):
     return render(request, 'report/map.html')
