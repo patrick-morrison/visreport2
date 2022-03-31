@@ -42,6 +42,10 @@ class Site(models.Model):
             return report
         except:
             return {'recent' : 'None'}
+    def reports(self):
+        return Report.objects.filter(site=self.pk)
+    def nreport(self):
+        return Report.objects.filter(site=self.pk).count()
 
 
 
@@ -49,13 +53,23 @@ class Site(models.Model):
 class Report(models.Model):
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     date = models.DateTimeField()
-    conditions = models.CharField(max_length=225)
+    CONDITION_CHOICES = [
+        ('Glassy', 'Glassy'),
+        ('Fair', 'Fair'),
+        ('Windy', 'Windy'),
+        ('Rough', 'Rough'),
+    ]
+    conditions = models.CharField(
+        max_length=10,
+        choices= CONDITION_CHOICES,
+        default='Fair'
+    )
     visibility = models.IntegerField(validators=[
             MaxValueValidator(25),
             MinValueValidator(0)
         ])
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    comments = models.CharField(max_length=225, null=True, blank=True)
+    comments = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
         return str(self.date.strftime("%Y-%m-%d-%H")) +"_"+ self.site.slug + "_by_"+ self.user.username

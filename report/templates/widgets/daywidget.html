@@ -1,0 +1,13 @@
+
+    <div class="col-4">
+        <labelclass="form-label">Date</label>
+        {% with widget=widget.subwidgets.0 %}
+            {% include widget.template_name %}
+        {% endwith %}
+    </div>
+    <div class="col-3">
+        <labelclass="form-label">Time</label>
+        {% with widget=widget.subwidgets.1 %}
+            {% include widget.template_name %}
+        {% endwith %}
+    </div>
