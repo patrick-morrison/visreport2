@@ -75,3 +75,14 @@ class Report(models.Model):
         return str(self.date.strftime("%Y-%m-%d-%H")) +"_"+ self.site.slug + "_by_"+ self.user.username
     class Meta:
         ordering = ('-date',)
+
+
+class SiteWeather(models.Model):
+    site = models.OneToOneField(Site, on_delete=models.CASCADE, primary_key=True)
+    slug = models.SlugField(unique=True)
+    last_updated = models.DateField()
+    wind = models.TextField(blank=True,null=True)
+
+
+    def __str__(self):
+        return self.site.name + " weather"

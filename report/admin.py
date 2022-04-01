@@ -7,7 +7,6 @@ from django.contrib.auth.admin import UserAdmin
 # Register your models here.
 from .models import *
 
-
 class RegionResource(resources.ModelResource):
 
     class Meta:
@@ -50,3 +49,5 @@ class UserAdmin(ImportExportModelAdmin, UserAdmin):
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+
+admin.site.register(SiteWeather)
