@@ -3,15 +3,17 @@
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <div class = container style = "max-width:70em">
+    <br>
 
+    <h2>Weather for {{siteweather.site.name}} <small class="text-muted">({{siteweather.site.slug}})</small></h2>
 <div id="windrose"></div>
+{% if user.is_superuser %}
 <form action="" method="post" onsubmit="document.getElementById('wind_button').value = d3.csvFormat(d3.selectAll('path').data());">
     {%csrf_token%}
     <button id = 'wind_button' name="wind" class="btn btn-success" >Save</button>
   
 </form>
-
-  </form>
+{% endif %}
 </div>
 
 <script>
@@ -62,8 +64,10 @@ var wind_data = d3.csv("{%url 'wind_csv' siteweather.slug%}", d3.autoType).then(
     .append("path")
       .attr("d", function (d) { return arc(d); } )
       .style("fill", function (d) { return color(d.score) } )
-      .style("stroke", 'white' )
+      .style("stroke", '#EAECEE' )
+      {% if user.is_superuser %}
       .on("click", updatescore)
+      {% endif %}
     
       svg
       .selectAll('labels')
