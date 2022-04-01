@@ -23,7 +23,7 @@ urlpatterns = [
     path('', views.home, name = 'home'),
     path('about', views.about, name = 'about'),
     path('list', views.list_reports.as_view(), name = 'list'),
-    path('<slug:site_id>', views.detail_site.as_view(), name = 'detail_site'),
+    path('<slug:slug>', views.detail_site.as_view(), name = 'detail_site'),
     path('reports/delete/<int:pk>', views.delete_report.as_view(), name = 'delete_report'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('sites_display.geojson', views.sites_display_geojson.as_view(),name='sites_display_geojson'),

@@ -62,6 +62,7 @@ var wind_data = d3.csv("{%url 'wind_csv' siteweather.slug%}", d3.autoType).then(
     .append("path")
       .attr("d", function (d) { return arc(d); } )
       .style("fill", function (d) { return color(d.score) } )
+      .style("stroke", 'white' )
       .on("click", updatescore)
     
       svg
