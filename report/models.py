@@ -5,6 +5,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms.models import model_to_dict
 from django.utils import timezone
 from django.contrib.humanize.templatetags.humanize import naturaltime
+import weather
 
 # Create your models here.
 class Region(models.Model):
@@ -46,6 +47,8 @@ class Site(models.Model):
         return Report.objects.filter(site=self.pk)
     def nreports(self):
         return Report.objects.filter(site=self.pk).count()
+    def weather(self):
+        return weather.models.SiteWeather.objects.get(site=self.pk)
 
 
 
@@ -77,12 +80,4 @@ class Report(models.Model):
         ordering = ('-date',)
 
 
-class SiteWeather(models.Model):
-    site = models.OneToOneField(Site, on_delete=models.CASCADE, primary_key=True)
-    slug = models.SlugField(unique=True)
-    last_updated = models.DateField()
-    wind = models.TextField(blank=True,null=True)
 
-
-    def __str__(self):
-        return self.site.name + " weather"

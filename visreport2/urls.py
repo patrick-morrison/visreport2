@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from report import views
+from weather import views as weather_views
 from report.models import Site
 
 urlpatterns = [
@@ -27,8 +28,10 @@ urlpatterns = [
     path('reports/delete/<int:pk>', views.delete_report.as_view(), name = 'delete_report'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('sites_display.geojson', views.sites_display_geojson.as_view(),name='sites_display_geojson'),
-    path('sites_weather/<slug:slug>', views.site_weather.as_view(),name='siteweather'),
-    path('sites_weather/csv/<slug:slug>', views.wind_csv, name = 'wind_csv'),
+    path('sites_weather/<slug:slug>', weather_views.site_weather_display.as_view(),name='siteweatherdisplay'),
+    path('sites_weather/<slug:slug>/edit/', weather_views.site_weather_edit.as_view(),name='siteweatheredit'),
+    path('sites_weather/<slug:slug>/wind_csv/', weather_views.wind_csv, name = 'wind_csv'),
+    path('sites_weather/<slug:slug>/weather_csv/', weather_views.weather_csv, name = 'weather_csv'),
     # AUTH
     path('accounts/signup', views.SignUp.as_view(), name = 'signup'),
     path('accounts/', include('django.contrib.auth.urls')),

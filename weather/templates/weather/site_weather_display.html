@@ -1,0 +1,165 @@
+
+    <!-- Load d3.js -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="wind_plot"></div>
+
+<style> /* set the CSS */
+
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+</style>
+
+
+<script>
+
+// set the dimensions and margins of the graph
+var margin = {top: 10, right: 40, bottom: 30, left: 60},
+    width = 700 - margin.left - margin.right,
+    height = 200 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#wind_plot")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+
+var wind_data = d3.csv("{%url 'weather_csv' site.weather.slug %}").then((data) => {
+
+var parseTime = d3.timeParse("%Y-%m-%dT%H:%M:%S%Z");
+
+var dates = [];
+for (let obj of data) {
+  dates.push(parseTime(obj.time));
+}
+
+var domain = d3.extent(dates);
+
+// gridlines in x axis function
+function make_x_gridlines() {		
+    return d3.axisBottom(x)
+        .ticks(10)
+}
+
+// gridlines in y axis function
+function make_y_gridlines() {		
+    return d3.axisLeft(y)
+        .ticks(5)
+}
+
+var x = d3.scaleTime()
+  .domain(domain)
+  .range([ 0, width ]);
+
+svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+ var y = d3.scaleLinear()
+    .domain([0, 30])
+    .range([ height, 0]);
+    
+  svg.append("g")
+    .call(d3.axisLeft(y)
+    .ticks(5));
+    
+ var y1 = d3.scaleLinear()
+    .domain([0, 6])
+    .range([ height, 0]);
+    
+      // add the X gridlines
+  svg.append("g")			
+      .attr("class", "grid")
+      .attr("transform", "translate(0," + height + ")")
+      .call(make_x_gridlines()
+          .tickSize(-height)
+          .tickFormat("")
+      )
+
+  // add the Y gridlines
+  svg.append("g")			
+      .attr("class", "grid")
+      .call(make_y_gridlines()
+          .tickSize(-width)
+          .tickFormat("")
+      )
+
+    
+svg.append("g")
+.attr("transform", "translate(600,0)")
+.call(d3.axisRight(y1).ticks(5));
+    
+  svg.append("path")
+      .datum(data)
+      .attr("fill", "#cce5df")
+      .attr("stroke", "#69b3a2")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.area()
+        .x(function(d) { return x(parseTime(d.time)) })
+        .y0(y(0))
+        .y1(function(d) { return y(d.swell*3) })
+        ) 
+        
+        
+svg.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "end")
+    .style("font-size", "14px")
+    .attr("y", 6)
+    .attr("dy", "-2.2em")
+    .attr("transform", "rotate(-90)")
+    .text("wind (knots)");
+    
+    svg.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "end")
+    .style("font-size", "14px")
+    .attr("y", 6)
+    .attr("dy", "590")
+    .attr("transform", "rotate(-90)")
+    .text("swell (m)");
+  
+  
+  var wind_colours = d3.scaleOrdinal()
+    .domain([0, 1, 2])
+    .range(['green', 'orange', 'red']);
+  
+  	 // create a tooltip
+  var Tooltip = d3.select("#wind_plot")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "2px")
+    .style("border-radius", "5px")
+    .style("padding", "5px")
+      
+  d3.select('g')
+	.selectAll('path')
+	.data(data)
+	.enter()
+	.append('path')
+	.attr('transform', function(d) {
+		return 'translate(' + x(parseTime(d.time)) + ','+y(d.wind) +' ) rotate(' + d.wind_dir + ')';
+	})
+	.attr('d', "M2.2 0 0 6.6 0 6.6 0 6.6-2.2 0-5.5-6.6 0-4.4 5.5-6.6Z")
+	.style("fill", function(d) {return wind_colours(d.wind_score);})
+
+
+})
+
+</script>

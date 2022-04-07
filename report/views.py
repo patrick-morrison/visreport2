@@ -1,16 +1,13 @@
-from curses import REPORT_MOUSE_POSITION
 from django.shortcuts import get_object_or_404, render, redirect
 from djgeojson.views import GeoJSONLayerView
 from django.urls import reverse_lazy
 from django.views import generic
 from django.views.generic.edit import FormMixin
 from .models import *
+from report.models import *
 from .forms import *
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-import csv
-from django.http import HttpResponse
-from datetime import datetime
 
 
 # Create your views here.
@@ -87,23 +84,3 @@ def account(request):
      'username':user.username},)
     })
 
-class site_weather(generic.DetailView):
-    model = SiteWeather
-    template_name = 'weather/site_weather.html'
-    def post(self, request, *args, **kwargs):
-            siteweather = get_object_or_404(SiteWeather, slug=self.kwargs['slug'])
-            siteweather.wind = request.POST['wind']
-            siteweather.last_updated = datetime.today()
-            siteweather.save()
-            return redirect('siteweather', siteweather.slug)
-    
-
-def wind_csv(request, slug):
-    site_weather = get_object_or_404(SiteWeather, slug=slug)
-    
-    response = HttpResponse(
-        content_type='text/csv',
-        content=site_weather.wind,
-    )
-
-    return response

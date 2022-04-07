@@ -11,6 +11,15 @@
 <p>
 {%if site.link%}<a href="{{site.link}}" class="btn btn-light btn-sm" target="_blank">🔗 More info {{site.link_caption}}</a>{%endif%}
 </p>
+
+{%if site.weather %}
+{% include "weather/site_weather_display.html" %} 
+<p>
+<a href="{%url 'siteweatheredit' site.weather.slug %}" class="btn btn-light btn-sm">See weather details</a>
+</p>
+{%endif%}
+
+
 {% if user.is_authenticated %}
 {% include "report/report_form.html" %} 
 {% endif %}
