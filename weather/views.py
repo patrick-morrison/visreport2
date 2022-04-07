@@ -45,7 +45,7 @@ def weather_csv(request, slug):
     site_weather = get_object_or_404(SiteWeather, slug=slug)
     time_since_update = timezone.now() - site_weather.weather_updated
 
-    if time_since_update.seconds > 14400:
+    if time_since_update.total_seconds() > 14400:
         update_weather(slug)
         site_weather = get_object_or_404(SiteWeather, slug=slug)
 
