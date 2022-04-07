@@ -24,7 +24,7 @@ class site_weather_edit(generic.DetailView):
             siteweather.wind = request.POST['wind']
             siteweather.last_updated = datetime.today()
             siteweather.save()
-            return redirect('siteweather', siteweather.slug)
+            return redirect('siteweatheredit', siteweather.slug)
 
 class site_weather_display(generic.DetailView):
     model = SiteWeather
