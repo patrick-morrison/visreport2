@@ -69,16 +69,17 @@ def weather_csv(request, slug):
         con, how="left", on=["angle", "wind"]
     ).rename({'score': 'wind_score'}, axis=1)
 
-    def swell_calc(swell, marginal, bad):
+    def swell_calc(swell, marginal, max):
         if swell <= marginal:
             score = 0
-        elif swell <= bad:
+        elif swell <= max:
             score = 1
         else:
             score = 2
         return score
 
-    swell = storm['swellHeight.meteo'].apply(swell_calc, marginal=1, bad = 1.2)
+    swell = storm['swellHeight.meteo'].apply(
+        swell_calc, marginal=site_weather.swell_marginal, max = site_weather.swell_max)
 
     def cap(n):
         return min(n, 2)

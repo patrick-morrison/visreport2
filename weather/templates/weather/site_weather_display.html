@@ -17,6 +17,14 @@
   stroke-width: 0;
 }
 
+.line {
+  stroke: url(#swell_gradient);
+  stroke-width: 1.5;
+  fill : url(#swell_gradient);
+  opacity : 0.5;
+}
+
+
 </style>
 
 
@@ -47,6 +55,10 @@ for (let obj of data) {
 }
 
 var domain = d3.extent(dates);
+
+var wind_colours = d3.scaleOrdinal()
+    .domain([0, 1, 2])
+    .range(['green', 'orange', 'red']);
 
 // gridlines in x axis function
 function make_x_gridlines() {		
@@ -101,11 +113,21 @@ svg.append("g")
 svg.append("g")
 .attr("transform", "translate(600,0)")
 .call(d3.axisRight(y1).ticks(5));
+
+svg.append("linearGradient")
+    .attr("id", "swell_gradient")
+    .attr("gradientUnits", "userSpaceOnUse")
+    .attr("x1", 0)
+    .attr("x2", width)
+  .selectAll("stop")
+  .data(data)
+  .join("stop")
+    .attr("offset", d => x(parseTime(d.time)) / width)
+    .attr("stop-color", d => wind_colours(parseInt(d.swell_score)));
     
   svg.append("path")
       .datum(data)
-      .attr("fill", "#cce5df")
-      .attr("stroke", "#69b3a2")
+      .attr("class", "line")
       .attr("stroke-width", 1.5)
       .attr("d", d3.area()
         .x(function(d) { return x(parseTime(d.time)) })
@@ -132,21 +154,9 @@ svg.append("text")
     .attr("transform", "rotate(-90)")
     .text("swell (m)");
   
-  
-  var wind_colours = d3.scaleOrdinal()
-    .domain([0, 1, 2])
-    .range(['green', 'orange', 'red']);
+
   
   	 // create a tooltip
-  var Tooltip = d3.select("#wind_plot")
-    .append("div")
-    .style("opacity", 0)
-    .attr("class", "tooltip")
-    .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "2px")
-    .style("border-radius", "5px")
-    .style("padding", "5px")
       
   d3.select('g')
 	.selectAll('path')
@@ -158,6 +168,7 @@ svg.append("text")
 	})
 	.attr('d', "M2.2 0 0 6.6 0 6.6 0 6.6-2.2 0-5.5-6.6 0-4.4 5.5-6.6Z")
 	.style("fill", function(d) {return wind_colours(d.wind_score);})
+    .style("opacity", 0.7)
 
 
 })
