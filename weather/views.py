@@ -78,14 +78,14 @@ def weather_csv(request, slug):
             score = 2
         return score
 
-    swell = storm['swellHeight.noaa'].apply(swell_calc, marginal=1, bad = 1.2)
+    swell = storm['swellHeight.meteo'].apply(swell_calc, marginal=1, bad = 1.2)
 
     def cap(n):
         return min(n, 2)
 
     scores = pd.DataFrame({
         'time': storm['time'],
-        'swell': storm['swellHeight.noaa'],
+        'swell': storm['swellHeight.meteo'],
         'wind': (storm['windSpeed.noaa']*1.944).round(decimals = 2),
         'wind_dir': storm['windDirection.noaa'],
         'swell_score': swell,
@@ -115,7 +115,7 @@ def update_weather(slug):
         'lng': 115.68122863769531,
         'params': ','.join(['swellHeight', 'swellPeriod', 'swellDirection', 'windSpeed', 'windDirection']),
         'start': start.to('UTC').timestamp(),  # Convert to UTC timestamp
-        'source':'noaa'
+        'source':'noaa,meteo'
     },
     headers={
         'Authorization': settings.STORMGLASS_API
