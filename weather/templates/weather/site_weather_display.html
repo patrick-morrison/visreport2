@@ -132,7 +132,7 @@ svg.append("linearGradient")
       .attr("d", d3.area()
         .x(function(d) { return x(parseTime(d.time)) })
         .y0(y(0))
-        .y1(function(d) { return y(d.swell*3) })
+        .y1(function(d) { return y(d.swell*5) })
         ) 
         
         
@@ -167,7 +167,7 @@ svg.append("text")
 		return 'translate(' + x(parseTime(d.time)) + ','+y(d.wind) +' ) rotate(' + d.wind_dir + ')';
 	})
 	.attr('d', "M2.2 0 0 6.6 0 6.6 0 6.6-2.2 0-5.5-6.6 0-4.4 5.5-6.6Z")
-	.style("fill", function(d) {return wind_colours(d.wind_score);})
+	.style("fill", function(d) {return wind_colours(parseInt(d.wind_score));})
     .style("opacity", 0.7)
 
 
