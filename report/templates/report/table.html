@@ -17,7 +17,7 @@
     <tbody>
       {% if user.is_authenticated %}
       <tr class="d-none d-lg-table-row">
-        <form method = 'post', id = 'reportform'>
+        <form method = 'post', id = 'report_table'>
           {%csrf_token%}
           {% load widget_tweaks %}
         <td><div class="row g-2">{%render_field form.date class='form-control'%}<div class="row g-2"></div></td>

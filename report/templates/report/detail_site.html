@@ -31,6 +31,22 @@
 
 </div>
 
-
+<script>
+$('select[name="date_0"]').on('keyup input', function() {
+    $('select[name="date_0"]').not(this).val($(this).val());
+});
+$('select[name="date_1"]').on('keyup input', function() {
+    $('select[name="date_1"]').not(this).val($(this).val());
+});
+$('input[name="visibility"]').on('keyup input', function() {
+    $('input[name="visibility"]').not(this).val($(this).val());
+});
+$('select[name="conditions"]').on('keyup input', function() {
+    $('select[name="conditions"]').not(this).val($(this).val());
+});
+$('input[name="comments"]').on('keyup input', function() {
+    $('input[name="comments"]').not(this).val($(this).val());
+});
+</script>
 
 {% endblock %}
