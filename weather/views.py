@@ -53,10 +53,11 @@ def weather_csv(request, slug):
         site_weather = get_object_or_404(SiteWeather, slug=slug)
 
     wind_data = pd.json_normalize(site_weather.weather['forecasts']['wind']['days'], record_path='entries'
-    ).drop(['directionText'], axis=1).rename(columns={"speed": "wind", "direction": "wind_dir",})
+    ).rename(columns={"speed": "wind", "direction": "wind_dir", "directionText": "wind_dir_text"})
 
-    swell_data = pd.json_normalize(site_weather.weather['forecasts']['swell']['days'], record_path='entries').drop(['directionText', 'period', 'direction'], axis=1
-    ).rename(columns={"height": "swell"})
+    swell_data = pd.json_normalize(site_weather.weather['forecasts']['swell']['days'], record_path='entries'
+    ).drop(['period', 'direction'], axis=1
+    ).rename(columns={"height": "swell", "directionText": "swell_dir_text"})
 
     weather = pd.merge(
     wind_data,
@@ -96,8 +97,10 @@ def weather_csv(request, slug):
     scores = pd.DataFrame({
         'time': weather['dateTime'],
         'swell': weather['swell'],
-        'wind': (weather['wind']*0.54).round(decimals = 2),
+        'swell_dir_text' : weather['swell_dir_text'],
+        'wind': (weather['wind']*0.54).round(decimals = 1),
         'wind_dir': weather['wind_dir'],
+        'wind_dir_text' : weather['wind_dir_text'],
         'swell_score': swell,
         'wind_score': wind['wind_score'],
         'total_score': (swell+wind['wind_score']).apply(cap),

@@ -16,7 +16,7 @@
 {% include "weather/site_weather_display.html" %} 
 <p>
 <a href="{%url 'siteweatheredit' site.weather.slug %}" class="btn btn-light btn-sm">See weather details</a>
-<small class="text-muted">{{site.weather.weather_station}}</small>
+<span rel="tooltip" title="Data from Willyweather API and Bureau of Meteorology"><small class="text-muted">{{site.weather.weather_station}}</small></span>
 </p>
 {%endif%}
 

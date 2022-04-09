@@ -21,7 +21,7 @@
   stroke: url(#swell_gradient);
   stroke-width: 1.5;
   fill : url(#swell_gradient);
-  opacity : 0.5;
+  opacity : 0.4;
 }
 
 
@@ -136,7 +136,7 @@ svg.append("linearGradient")
         ) 
         
         
-svg.append("text")
+    svg.append("text")
     .attr("class", "y label")
     .attr("text-anchor", "end")
     .style("font-size", "14px")
@@ -154,9 +154,6 @@ svg.append("text")
     .attr("transform", "rotate(-90)")
     .text("swell (m)");
   
-
-  
-  	 // create a tooltip
       
   d3.select('g')
 	.selectAll('path')
@@ -169,6 +166,59 @@ svg.append("text")
 	.attr('d', "M2.2 0 0 6.6 0 6.6 0 6.6-2.2 0-5.5-6.6 0-4.4 5.5-6.6Z")
 	.style("fill", function(d) {return wind_colours(parseInt(d.wind_score));})
     .style("opacity", 0.7)
+
+
+    
+    var Tooltip = d3.select("#wind_plot")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip text-center")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("min-width", "130px")
+    .style("height", "80px")
+    .style("border-width", "1px")
+    .style("border-color", "grey")
+    .style("border-radius", "5px")
+    .style("padding", "6px")
+
+    const formatTime = d3.timeFormat("%a %I:00 %p");
+
+        var mouseover = function(event, a) {
+            Tooltip
+            .style("opacity", 1)
+            .html("<b>" + formatTime(parseTime(a.time))+
+                '</b><span style="color:' + wind_colours(parseInt(a.wind_score))+ '">' +
+                '<br>Wind: '+ a.wind + 'kn ' + a.wind_dir_text +
+                '</span><span style="color:' + wind_colours(parseInt(a.swell_score))+ '">' +
+              '<br>Swell: ' + a.swell + 'm ' + a.swell_dir_text + '</span>')
+            .style("top", event.y-100 + "px")
+            .style("left", event.x-60 + "px")
+            d3.select(event.currentTarget)
+            .style("stroke", "grey")
+            .style("fill", "grey")
+            .style("opacity", .3)
+        }
+        var mouseleave = function(d) {
+            Tooltip
+            .style("opacity", 0)
+            d3.select(this)
+            .style("stroke", "none")
+            .style("fill", "none")
+            .style("opacity", 0.8)
+        }
+
+    svg.append("g")
+      .attr("fill", "None")
+      .attr("pointer-events", "all")
+    .selectAll("rect")
+    .data(d3.pairs(data))
+    .join("rect")
+      .attr("x", ([a, b]) => x(parseTime(a.time)))
+      .attr("height", height)
+      .attr("width", ([a, b]) => x(parseTime(b.time)) - x(parseTime(a.time)))
+      .on("mouseover", (event, [a]) => mouseover(event, a))
+      .on("mouseout", mouseleave)
 
 
 })
