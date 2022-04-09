@@ -47,7 +47,7 @@ var svg = d3.select("#wind_plot")
 
 var wind_data = d3.csv("{%url 'weather_csv' site.weather.slug %}").then((data) => {
 
-var parseTime = d3.timeParse("%Y-%m-%dT%H:%M:%S%Z");
+var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
 
 var dates = [];
 for (let obj of data) {

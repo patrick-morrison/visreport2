@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views import generic
 from .models import *
 from report.models import *
-import csv
+import csv, json
 from django.http import HttpResponse
 from datetime import datetime
 from django.utils import timezone
@@ -13,6 +13,7 @@ import arrow
 import requests
 import io
 from django.conf import settings
+from djgeojson.fields import PointField
 
 # Create your views here.
 
@@ -42,26 +43,35 @@ def wind_csv(request, slug):
     return response
 
 def weather_csv(request, slug):
+
     site_weather = get_object_or_404(SiteWeather, slug=slug)
+    con = pd.read_csv(io.StringIO(site_weather.wind)).drop('label', axis=1)
     time_since_update = timezone.now() - site_weather.weather_updated
 
-    if time_since_update.total_seconds() > 14400:
+    if time_since_update.total_seconds() > 10:
         update_weather(slug)
         site_weather = get_object_or_404(SiteWeather, slug=slug)
 
-    
-    storm = pd.json_normalize(site_weather.weather,record_path =['hours'])
-    con = pd.read_csv(io.StringIO(site_weather.wind)).drop('label', axis=1)
+    wind_data = pd.json_normalize(site_weather.weather['forecasts']['wind']['days'], record_path='entries'
+    ).drop(['directionText'], axis=1).rename(columns={"speed": "wind", "direction": "wind_dir",})
+
+    swell_data = pd.json_normalize(site_weather.weather['forecasts']['swell']['days'], record_path='entries').drop(['directionText', 'period', 'direction'], axis=1
+    ).rename(columns={"height": "swell"})
+
+    weather = pd.merge(
+    wind_data,
+     swell_data, how="left", on=['dateTime']
+     ).fillna(method="ffill")
 
     def clamp(n, maxn=15):
         return max(min(maxn, n), 0)
     
     rounded = pd.DataFrame({
         'wind': pd.to_numeric(
-            5*((storm['windSpeed.noaa']*1.944/5
+            5*((weather['wind']*0.54/5
         ).apply(np.floor)), downcast='integer'
         ).apply(clamp),
-        'angle': pd.to_numeric(45*((storm['windDirection.noaa']/45).apply(np.round)), downcast='integer').replace([360],0),
+        'angle': pd.to_numeric(45*((weather['wind']/45).apply(np.round)), downcast='integer').replace([360],0),
     })
 
     wind = pd.merge(
@@ -69,26 +79,25 @@ def weather_csv(request, slug):
         con, how="left", on=["angle", "wind"]
     ).rename({'score': 'wind_score'}, axis=1)
 
-    def swell_calc(swell, marginal, max):
+    def swell_calc(swell, marginal, bad):
         if swell <= marginal:
             score = 0
-        elif swell <= max:
+        elif swell <= bad:
             score = 1
         else:
             score = 2
         return score
 
-    swell = storm['swellHeight.meteo'].apply(
-        swell_calc, marginal=site_weather.swell_marginal, max = site_weather.swell_max)
+    swell = weather['swell'].apply(swell_calc, marginal=1, bad = 1.2)
 
     def cap(n):
         return min(n, 2)
 
     scores = pd.DataFrame({
-        'time': storm['time'],
-        'swell': storm['swellHeight.meteo'],
-        'wind': (storm['windSpeed.noaa']*1.944).round(decimals = 2),
-        'wind_dir': storm['windDirection.noaa'],
+        'time': weather['dateTime'],
+        'swell': weather['swell'],
+        'wind': (weather['wind']*0.54).round(decimals = 2),
+        'wind_dir': weather['wind_dir'],
         'swell_score': swell,
         'wind_score': wind['wind_score'],
         'total_score': (swell+wind['wind_score']).apply(cap),
@@ -106,25 +115,40 @@ def weather_csv(request, slug):
 
 def update_weather(slug):
     site_weather = get_object_or_404(SiteWeather, slug=slug)
-    # Get first hour of today
-    start = arrow.now().floor('day')
+    site = get_object_or_404(Site, pk=site_weather.site.slug)
 
-    response = requests.get(
-    'https://api.stormglass.io/v2/weather/point',
+    api_key = settings.WEATHER_API
+
+    lon = site.location['coordinates'][0]
+    lat = site.location['coordinates'][1]
+    
+
+    search_url = f'https://api.willyweather.com.au/v2/{api_key}/search.json'
+    search = requests.get(
+        search_url,params={
+            'lat': lat,
+            'lng': lon,
+            "range": 20,
+            "distance": "km"
+        },
+        )
+    id = search.json()['location']['id']
+    name = search.json()['location']['name']
+
+    forecast_url = f'https://api.willyweather.com.au/v2/{api_key}/locations/{id}/weather.json'
+    startDate = arrow.now().floor('day').format('YYYY-MM-DD')
+    forecast = requests.get(
+    forecast_url,
     params={
-        'lat': -32.06453,
-        'lng': 115.68122863769531,
-        'params': ','.join(['swellHeight', 'swellPeriod', 'swellDirection', 'windSpeed', 'windDirection']),
-        'start': start.to('UTC').timestamp(),  # Convert to UTC timestamp
-        'source':'noaa,meteo'
+        'forecasts': 'wind,swell',
+        'days':7,
+        'startDate': startDate,  # Convert to UTC timestamp
     },
-    headers={
-        'Authorization': settings.STORMGLASS_API
-    }
     )
 
     # Do something with response data.
-    storm_json = response.json()
-    site_weather.weather = storm_json
+    weather_json = forecast.json()
+    site_weather.weather = weather_json
+    site_weather.weather_station = f'Station {id}: {name}'
     site_weather.weather_updated = timezone.now()
     site_weather.save()
