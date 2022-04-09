@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'djgeojson',
     'widget_tweaks',
     'import_export',
+    'captcha'
 ]
 
 MIDDLEWARE = [
@@ -136,6 +137,9 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 WEATHER_API = os.environ.get('WEATHER_API')
+
+RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
+RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
 
 # Uncomment if you have extra static files and a directory in your GitHub repo.
 # If you don't have this directory and have this uncommented your build will fail
