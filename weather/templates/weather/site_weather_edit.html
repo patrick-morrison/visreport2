@@ -27,8 +27,32 @@
     </div>
     <br>
     <button id = 'wind_button' name="wind" class="btn btn-success" >Save</button>
+
+
   
 </form>
+
+{% else %}
+
+<table class="table table-borderless" style="max-width:300px">
+<tr class="table-success">
+    <th scope="row">Good well: </th>
+    <td>0 to {{siteweather.swell_marginal}}m</td>
+</tr>
+<tr class="table-warning">
+  <th scope="row">Marginal swell: </th>
+  <td> {{siteweather.swell_marginal}}- {{siteweather.swell_max}}m</td>
+</tr>
+<tr class="table-danger">
+  <th scope="row">Maximum swell: </th>
+  <td>{{siteweather.swell_max}}m+</td>
+</tr>
+
+</table>
+
+
+
+
 {% endif %}
 </div>
 
