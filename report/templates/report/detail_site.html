@@ -16,6 +16,7 @@
 {% include "weather/site_weather_display.html" %} 
 <p>
 <a href="{%url 'siteweatheredit' site.weather.slug %}" class="btn btn-light btn-sm">See weather details</a>
+<small class="text-muted">{{site.weather.weather_station}}</small>
 </p>
 {%endif%}
 

@@ -48,7 +48,7 @@ def weather_csv(request, slug):
     con = pd.read_csv(io.StringIO(site_weather.wind)).drop('label', axis=1)
     time_since_update = timezone.now() - site_weather.weather_updated
 
-    if time_since_update.total_seconds() > 10:
+    if time_since_update.total_seconds() > 1:
         update_weather(slug)
         site_weather = get_object_or_404(SiteWeather, slug=slug)
 
@@ -146,8 +146,37 @@ def update_weather(slug):
     },
     )
 
-    # Do something with response data.
     weather_json = forecast.json()
+
+    if not weather_json['forecasts']['swell']:
+        close_url = f'https://api.willyweather.com.au/v2/{api_key}/search/closest.json'
+        close = requests.get(
+        close_url,
+        params={
+            'id':id,
+            'weatherTypes':"swell",
+            "distance": "km"
+        },
+        )
+
+        # Do something with response data.
+        id = close.json()['swell'][0]['id']
+        name = close.json()['swell'][0]['name']
+
+        forecast_url = f'https://api.willyweather.com.au/v2/{api_key}/locations/{id}/weather.json'
+        startDate = arrow.now().floor('day').format('YYYY-MM-DD')
+
+        forecast = requests.get(
+        forecast_url,
+        params={
+            'forecasts': 'wind,swell',
+            'days': 7,
+            'startDate': startDate,  # Convert to UTC timestamp
+        },
+        )
+        weather_json = forecast.json()
+
+    # Do something with response data.
     site_weather.weather = weather_json
     site_weather.weather_station = f'Station {id}: {name}'
     site_weather.weather_updated = timezone.now()
