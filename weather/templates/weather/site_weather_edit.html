@@ -5,11 +5,27 @@
 <div class = container style = "max-width:70em">
     <br>
 
-    <h2>Weather for {{siteweather.site.name}} <small class="text-muted">({{siteweather.site.slug}})</small></h2>
+    <a style ='color: unset; text-decoration: unset;' href = "{%url 'detail_site' siteweather.site.slug%}"><h2>Weather for {{siteweather.site.name}} <small class="text-muted">({{siteweather.site.slug}})</small></h2></a>
 <div id="windrose"></div>
 {% if user.is_superuser %}
 <form action="" method="post" onsubmit="document.getElementById('wind_button').value = d3.csvFormat(d3.selectAll('path').data());">
     {%csrf_token%}
+    <div class="row" style="max-width: 300px;">
+      <div class="col">
+        <label class="form-label">Swell marginal</label>
+        <div class="input-group">
+        <input type="text" class="form-control" name="swell_marginal" value="{{siteweather.swell_marginal}}" placeholder="{{siteweather.swell_marginal}}" aria-label="First name">
+        <div class="input-group-text">m</div></div>
+      </div>
+      <div class="col">
+        
+        <label class="form-label">Swell max.</label>
+        <div class="input-group">
+        <input type="text" class="form-control" name="swell_max" value="{{siteweather.swell_max}}" placeholder="{{siteweather.swell_max}}" aria-label="max">
+        <div class="input-group-text">m</div></div>
+      </div>
+    </div>
+    <br>
     <button id = 'wind_button' name="wind" class="btn btn-success" >Save</button>
   
 </form>

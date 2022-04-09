@@ -23,6 +23,8 @@ class site_weather_edit(generic.DetailView):
     def post(self, request, *args, **kwargs):
             siteweather = get_object_or_404(SiteWeather, slug=self.kwargs['slug'])
             siteweather.wind = request.POST['wind']
+            siteweather.swell_marginal = request.POST['swell_marginal']
+            siteweather.swell_max = request.POST['swell_max']
             siteweather.last_updated = datetime.today()
             siteweather.save()
             return redirect('siteweatheredit', siteweather.slug)
@@ -48,7 +50,7 @@ def weather_csv(request, slug):
     con = pd.read_csv(io.StringIO(site_weather.wind)).drop('label', axis=1)
     time_since_update = timezone.now() - site_weather.weather_updated
 
-    if time_since_update.total_seconds() > 1:
+    if time_since_update.total_seconds() > 3*3600:
         update_weather(slug)
         site_weather = get_object_or_404(SiteWeather, slug=slug)
 
@@ -80,16 +82,16 @@ def weather_csv(request, slug):
         con, how="left", on=["angle", "wind"]
     ).rename({'score': 'wind_score'}, axis=1)
 
-    def swell_calc(swell, marginal, bad):
+    def swell_calc(swell, marginal, max):
         if swell <= marginal:
             score = 0
-        elif swell <= bad:
+        elif swell <= max:
             score = 1
         else:
             score = 2
         return score
 
-    swell = weather['swell'].apply(swell_calc, marginal=1, bad = 1.2)
+    swell = weather['swell'].apply(swell_calc, marginal=site_weather.swell_marginal, max = site_weather.swell_max)
 
     def cap(n):
         return min(n, 2)

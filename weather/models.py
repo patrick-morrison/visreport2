@@ -49,8 +49,8 @@ class SiteWeather(models.Model):
     wind = models.TextField(blank=True,null=True, default=wind_default)
     weather = models.JSONField(blank=True, null=True)
     weather_updated = models.DateTimeField(default=yesterday)
-    swell_marginal = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
-    swell_max = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
+    swell_marginal = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True, default = 1.3)
+    swell_max = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True, default = 2.5)
     weather_station = models.CharField(max_length = 255,blank=True,null=True)
 
     def __str__(self):
