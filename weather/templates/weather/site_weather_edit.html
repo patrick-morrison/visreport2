@@ -2,15 +2,15 @@
 {% block content %}
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<div class = container style = "max-width:70em">
+<div class = 'container' style = "max-width:40em">
     <br>
-
     <a style ='color: unset; text-decoration: unset;' href = "{%url 'detail_site' siteweather.site.slug%}"><h2>Weather for {{siteweather.site.name}} <small class="text-muted">({{siteweather.site.slug}})</small></h2></a>
+    <p>Conditions depend mainly on swell, wind speed and wind direction. Green means a comfortable dive, yellow is marginal, and red will be uncomfortable. Direction on this wind rose where wind is coming from.</p>
 <div id="windrose"></div>
 {% if user.is_superuser %}
 <form action="" method="post" onsubmit="document.getElementById('wind_button').value = d3.csvFormat(d3.selectAll('path').data());">
     {%csrf_token%}
-    <div class="row" style="max-width: 300px;">
+    <div class="row" style="max-width: 330px;">
       <div class="col">
         <label class="form-label">Swell marginal</label>
         <div class="input-group">
@@ -27,14 +27,11 @@
     </div>
     <br>
     <button id = 'wind_button' name="wind" class="btn btn-success" >Save</button>
-
-
-  
 </form>
 
 {% else %}
 
-<table class="table table-borderless" style="max-width:300px">
+<table class="table table-borderless" style="max-width:330px">
 <tr class="table-success">
     <th scope="row">Good well: </th>
     <td>0 to {{siteweather.swell_marginal}}m</td>
@@ -54,12 +51,14 @@
 
 
 {% endif %}
+<br>
+<small class="text-muted">Data from Willyweather API and Bureau of Meteorology. {{siteweather.weather_station}}<small>
 </div>
 
 <script>
 
-var width = 300
-    height = 300
+var width = 330
+    height = 330
     margin = 5
 
 var radius = Math.min(width, height) / 2 - margin
