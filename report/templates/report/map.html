@@ -138,7 +138,7 @@
     }
 
     function visText(report) {
-        if (report.recent == 'True') {
+        if (report.recent != 'None') {
             return "<span style = 'color:" + getColor(report.visibility) + ";'>" +
                 "<u>" + report.since + "</u></br>" +
                 report.visibility + "m" +  " reported  by @" + report.username + "</span>"
