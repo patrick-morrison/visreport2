@@ -3,8 +3,9 @@
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
 <!-- Create a div where the graph will take place -->
-<div id="wind_plot" style = 'overflow-x: auto;'></div>
-
+<div style = 'overflow-x: scroll; width: 100%;' >
+<div id="wind_plot"></div>
+</div>
 <style> /* set the CSS */
 
 .grid line {
@@ -180,8 +181,8 @@ svg.append("linearGradient")
     .style("border-color", "grey")
     .style("border-radius", "5px")
     .style("padding", "6px")
-    .style("top", "200px")
-    .style("left", "1000px")
+    .style("top", "0px")
+    .style("left", "0px")
 
     const formatTime = d3.timeFormat("%a %I:00 %p");
 
