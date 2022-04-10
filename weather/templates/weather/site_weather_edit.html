@@ -5,7 +5,7 @@
 <div class = 'container' style = "max-width:40em">
     <br>
     <a style ='color: unset; text-decoration: unset;' href = "{%url 'detail_site' siteweather.site.slug%}"><h2>Weather for {{siteweather.site.name}} <small class="text-muted">({{siteweather.site.slug}})</small></h2></a>
-    <p>Conditions depend mainly on swell, wind speed and wind direction. Green means a comfortable dive, yellow is marginal, and red will be uncomfortable. Direction on this wind rose where wind is coming from.</p>
+    <p>Conditions depend mainly on swell, wind speed and wind direction. Green means a comfortable dive, yellow is marginal, and red will be uncomfortable. Direction on this wind rose is where wind is coming from. Arrows on the weekly graph point in direction wind is blowing to.</p>
 <div id="windrose"></div>
 {% if user.is_superuser %}
 <form action="" method="post" onsubmit="document.getElementById('wind_button').value = d3.csvFormat(d3.selectAll('path').data());">

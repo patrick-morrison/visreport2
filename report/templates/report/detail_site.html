@@ -15,8 +15,8 @@
 {%if site.weather %}
 {% include "weather/site_weather_display.html" %} 
 <p>
-<a href="{%url 'siteweatheredit' site.weather.slug %}" class="btn btn-light btn-sm">See weather details</a>
-<small class="text-muted">tldr: <span style="color:green">green good,</span> <span style="color:red">red bad.</span></small></span>
+<small class="text-muted">Guide: <span style="color:green">green good,</span> <span style="color:red">red bad.</span> Arrows wind, line swell.</small></span><br>
+<a href="{%url 'siteweatheredit' site.weather.slug %}" class="btn btn-light btn-sm">Weather details</a>
 </p>
 {%endif%}
 
