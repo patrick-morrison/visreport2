@@ -178,7 +178,7 @@ svg.append("linearGradient")
     .style("border", "solid")
     .style("height", "0px")
     .style("border-width", "1px")
-    .style("border-color", "grey")
+    .style("border-color", "#343a40")
     .style("border-radius", "5px")
     .style("padding", "6px")
     .style("top", "0px")
@@ -188,7 +188,7 @@ svg.append("linearGradient")
 
         var mouseover = function(event, a) {
             Tooltip
-            .style("opacity", 1)
+            .style("opacity", .90)
             .style("min-width", "130px")
             .style("height", "80px")
             .html("<b>" + formatTime(parseTime(a.time))+
@@ -199,9 +199,9 @@ svg.append("linearGradient")
             .style("top", event.y-100 + "px")
             .style("left", event.x-60 + "px")
             d3.select(event.currentTarget)
-            .style("stroke", "grey")
-            .style("fill", "grey")
-            .style("opacity", .3)
+            .style("stroke", wind_colours(parseInt(a.total_score)))
+            .style("fill", wind_colours(parseInt(a.total_score)))
+            .style("opacity", .25)
         }
         var mouseleave = function(d) {
             Tooltip
