@@ -4,7 +4,9 @@
 <div class = 'container'>
     <br/>
     <h2>Create an account</h2>
-    <p>Creating an account lets you add inspection reports.</p>
+    <p>With an account you can add reports.</p>
+    <p>By signing up you agree that data you contribute is <a href="{%url 'about'%}">made freely
+        available for research.</a></p>
     <p>Have an account? <a href = "{% url 'login' %}">Log in</a></p>
     <div class = 'form-group {%if field.errors%}alert alert-danger{%endif%}' style="max-width: 400px;">
         <form method = 'post'>

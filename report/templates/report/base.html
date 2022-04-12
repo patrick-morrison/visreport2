@@ -61,7 +61,7 @@
           {% if user.is_authenticated %}
           <li class="nav-item dropdown dropdown-menu-right">
             <a class="nav-link dropdown-toggle" href="#" id="account_dropdown" data-bs-toggle="dropdown"
-              aria-expanded="false">Account</a>
+              aria-expanded="false">Logged in as {{request.user.username}}</a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account_dropdown">
               <li><a class="dropdown-item" href="{%url 'account'%}">Account</a></li>
               {% if user.is_superuser %}
