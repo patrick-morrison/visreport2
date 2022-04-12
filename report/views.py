@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from djgeojson.views import GeoJSONLayerView
+from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.views import generic
 from django.views.generic.edit import FormMixin
@@ -53,6 +54,15 @@ class sites_display_geojson(GeoJSONLayerView):
     geometry_field = 'location'
     properties = ('name', 'last_report')
 
+class sites_json(GeoJSONLayerView):
+    model = Site
+    precision = 4
+    geometry_field = 'location'
+    properties = ('name', 'slug', 'description','date_added','region1','region2')
+
+def reports_json(request):
+   data=list(Report.objects.values())
+   return JsonResponse(data,safe=False)
 
 #User views
 class SignUp(generic.CreateView):
