@@ -196,8 +196,8 @@ svg.append("linearGradient")
                 '<br>Wind: '+ a.wind + 'kn ' + a.wind_dir_text +
                 '</span><span style="color:' + wind_colours(parseInt(a.swell_score))+ '">' +
               '<br>Swell: ' + a.swell + 'm ' + a.swell_dir_text + '</span>')
-            .style("top", event.y-100 + "px")
-            .style("left", event.x-60 + "px")
+            .style("top", event.pageY-100 + "px")
+            .style("left", event.pageX-60 + "px")
             d3.select(event.currentTarget)
             .style("stroke", wind_colours(parseInt(a.total_score)))
             .style("fill", wind_colours(parseInt(a.total_score)))
