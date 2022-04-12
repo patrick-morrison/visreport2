@@ -22,7 +22,9 @@
 
 
 {% if user.is_authenticated %}
-{% include "report/report_form.html" %} 
+{% include "report/report_form.html" %}
+{% else %}
+<p><a class="link-primary" href="{%url 'login'%}">Login to add reports</a></p>
 {% endif %}
 <br>
 {% include "report/table.html" %} 
