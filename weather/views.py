@@ -74,7 +74,7 @@ def weather_csv(request, slug):
             5*((weather['wind']*0.54/5
         ).apply(np.floor)), downcast='integer'
         ).apply(clamp),
-        'angle': pd.to_numeric(45*((weather['wind']/45).apply(np.round)), downcast='integer').replace([360],0),
+        'angle': pd.to_numeric(45*((weather['wind_dir']/45).apply(np.round)), downcast='integer').replace([360],0),
     })
 
     wind = pd.merge(
