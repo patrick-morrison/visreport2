@@ -31,16 +31,28 @@
   <nav class="navbar navbar-expand-lg navbar-dark" aria-label="Navbar" style="background-color: #505D7D">
     <div class="container">
       <a class="navbar-brand" href="{%url 'home'%}">Vis.Report</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04"
-        aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+
+      <ul class="nav navbar-nav ms-auto">
+        <li class="nav-item">
+          {% if request.get_full_path != "/list" %}
+          <a class="nav-link active" href="{%url 'list'%}">List View</a>
+          {%endif%}
+          {% if request.get_full_path == "/list" %}
+          <a class="nav-link active" href="{%url 'home'%}">Map View</a>
+          {%endif%}
+        </li>
+      </ul>
+
+
+
+
+      <button class="navbar-toggler ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbar"
+        aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse" id="navbarsExample04">
+      <div class="collapse navbar-collapse" id="navbar">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{%url 'list'%}">List View</a>
-          </li>
           <li class="nav-item">
             <a class="nav-link active aria-current=" page" href="{%url 'about'%}">About</a>
           </li>
