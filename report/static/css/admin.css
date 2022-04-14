@@ -1,0 +1,49 @@
+#header{
+    background: #505D7D;
+    color: white;
+  }
+  #header a:link, #header a:visited {
+      color: white;
+  }
+  #branding h1{
+    color: white;
+  }
+
+  h1{
+    color: white;
+  }
+  .module h2, .module caption, .inline-group h2{
+    background: #505D7D;
+    color: white;
+  }
+  a.section:link{
+    color: white;
+  }
+  a:link{
+    color: #505D7D;
+  }
+
+  div.breadcrumbs {
+    background: #505D7D;
+    color:white;
+  }
+  div.breadcrumbs a {
+    color: white;
+  }
+
+  .button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: #505D7D;
+    color: #fff;
+  }
+  .button:hover, input[type=submit]:hover, input[type=button]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover{
+    background: #28a745;
+    color: #fff;
+  }
+  .button.default, input[type=submit].default, .submit-row input.default{
+    background: #505D7D;
+    color: #fff;
+  }
+  .button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover{
+    background: #28a745;
+    color: #fff;
+  }
