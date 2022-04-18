@@ -24,8 +24,13 @@ class UserCreationForm(UserCreationForm):
 
 class DateSelectorWidget(forms.MultiWidget):
     def __init__(self, attrs=None):
-        today = datetime.strftime(datetime.now(), '%Y-%m-%d')
-        yesterday = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
+
+        def today():
+            return datetime.strftime(datetime.now(), '%Y-%m-%d')
+
+        def yesterday():
+            return datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
+
         day = [(today,'Today'), (yesterday, "Yesterday")]
         timeofday = [(time(i).strftime('%H'), time(i).strftime('%I %p')) for i in range(24)]
         widgets = [
@@ -64,7 +69,15 @@ class ReportForm(forms.ModelForm):
         }
     def __init__(self, *args, **kwargs):
         super(ReportForm, self).__init__(*args, **kwargs)
-        self.fields['date'].initial = [datetime.strftime(datetime.now(), '%Y-%m-%d'), (datetime.now() - timedelta(hours = 1)).strftime('%H')]
+
+        def hour_ago():
+            return (datetime.now() - timedelta(hours = 1)).strftime('%H')
+
+        def today():
+            return datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
+
+
+        self.fields['date'].initial = [today(), hour_ago()]
 
 class PreferencesForm(UserChangeForm):
     class Meta:
