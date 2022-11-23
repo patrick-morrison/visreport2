@@ -23,7 +23,7 @@
             {%endfor%}
             <br>
     
-            <button type="submit" class='btn btn-primary'>Sign Up</button>
+            <button type="submit" id = "signup_button" class='btn btn-primary'>Sign Up</button>
         </div>
     
         </form>
@@ -32,5 +32,11 @@
 </div>
 
 </div>
+
+<script>
+    $('#signup_button').one('submit', function() {
+    $(this).find('input[type="submit"]').attr('disabled','disabled');
+});
+</script>
 
 {% endblock %}
