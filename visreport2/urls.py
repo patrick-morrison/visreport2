@@ -34,6 +34,7 @@ urlpatterns = [
     path('sites_weather/<slug:slug>/edit/', weather_views.site_weather_edit.as_view(),name='siteweatheredit'),
     path('sites_weather/<slug:slug>/wind_csv/', weather_views.wind_csv, name = 'wind_csv'),
     path('sites_weather/<slug:slug>/weather_csv/', weather_views.weather_csv, name = 'weather_csv'),
+    path('sites_image/<slug:slug>.png', views.site_image, name = 'sites_map'),
     # AUTH
     path('accounts/signup', views.SignUp.as_view(), name = 'signup'),
     path('accounts/', include('django.contrib.auth.urls')),

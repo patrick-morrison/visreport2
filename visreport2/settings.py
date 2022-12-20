@@ -22,6 +22,7 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split("
 LOGIN_URL = 'login/'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+SESSION_COOKIE_AGE = 12096000
 
 # Application definition
 
