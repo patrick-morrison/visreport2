@@ -13,6 +13,8 @@ import contextily as cx
 import geopandas
 import numpy as np
 import pandas
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
@@ -70,7 +72,6 @@ def reports_json(request):
    return JsonResponse(data,safe=False)
 
 def site_image(request, slug):
-    plt.switch_backend('Agg') 
 
     site_code = slug.upper()
     data_url = "https://vis.report/sites_display.geojson"
@@ -83,11 +84,11 @@ def site_image(request, slug):
 
     colors = {'<3m':'#d9534f', '3-8m':'#f0ad4e', '8-15m':'#5cb85c', '15+':'#0275d8', 'None':'#868e96'}
 
-    site = sites.set_index('id', append=True, drop=False).xs(site_code, level=1)
+    site = sites.set_index('id', append=True, drop=False).xs(site_code, level=1).reset_index(drop=True)
     xlim = ([site.buffer(0.1).total_bounds[0]-.04,  site.buffer(0.1).total_bounds[2]+.04])
-    ylim = ([site.buffer(0.1).total_bounds[1],  site.buffer(0.1).total_bounds[3]])
+    ylim = ([site.buffer(0.1).total_bounds[1]-.04,  site.buffer(0.1).total_bounds[3]+.04])
 
-    ax = sites.plot(c=reports['rank'].map(colors), alpha = reports.alpha, markersize =300, figsize=(7, 7))
+    ax = sites.plot(c=reports['rank'].map(colors), alpha = reports.alpha, markersize =250, figsize=(5, 5))
 
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
@@ -96,7 +97,12 @@ def site_image(request, slug):
     for i, (x, y) in enumerate(zip(sites.geometry.x, sites.geometry.y), start=0):
         ax.annotate(str(sites['id'][i]), (x,y), xytext=(0,0),fontsize=7, textcoords='offset points',
         ha='center', va='center', style='italic',weight='bold', color='white')
-
+        
+    t = ax.text(
+    site.geometry.x, site.geometry.y+.08,
+    f'{site["name"][0]}\n{site["last_report"][0]["since"]}\n{site["last_report"][0]["visibility"]}m reported by @{site["last_report"][0]["username"]}',
+    ha="center", va="center", size=12, color='white',
+    bbox=dict(boxstyle="round", fc="#292b2c"))
 
     cx.add_basemap(ax,source=cx.providers.CartoDB.Voyager, crs=sites.crs.to_string(), attribution_size=3)
 

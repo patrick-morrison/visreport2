@@ -90,6 +90,9 @@ elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
     }
 
+SERIALIZATION_MODULES = {
+    "geojson": "django.contrib.gis.serializers.geojson", 
+ }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
