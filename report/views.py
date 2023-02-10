@@ -9,6 +9,7 @@ from report.models import *
 from .forms import *
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 # Create your views here.
@@ -41,6 +42,14 @@ class detail_site(FormMixin, generic.DetailView):
 class list_reports(generic.ListView):
     model = Report
     template_name = "report/list_reports.html"
+
+class guide(generic.ListView):
+    model = Report
+    template_name = "report/guide.html"
+    def get_queryset(self):
+        seven_day_before = timezone.now() - timedelta(days=7)
+        recent_reports = Report.objects.filter(date__gte=seven_day_before)
+        return recent_reports
 
 
 class delete_report(generic.DeleteView):

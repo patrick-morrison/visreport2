@@ -1,0 +1,483 @@
+{% extends 'report/base.html' %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"
+        charset="utf-8"></script>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<style> /* set the CSS */
+
+
+    #map {
+        height: 400px;
+    }
+
+    .leaflet-tooltip-pane .label {
+        color: white;
+        font-weight: bolder;
+        font-style: italic;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        font-size: 1.1em font-family: "Arial Narrow", sans-serif;
+    }
+
+    .leaflet-popup-tip,
+    .leaflet-popup-content-wrapper {
+        background: #292b2c;
+        color: white;
+        font-size: 1.3em;
+        border-right: 15px solid transparent;
+    }
+
+    .legend {
+        padding: 3px 3px;
+        font: 12px Arial, Helvetica, sans-serif;
+        background: white;
+        background: rgba(255, 255, 255, 0.3);
+        /*box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);*/
+        /*border-radius: 5px;*/
+        line-height: 22px;
+        color: #292b2c;
+    }
+
+    .legend h4 {
+        text-align: left;
+        font-size: 14px;
+        margin: 2px 3px 3px;
+        color: #292b2c;
+    }
+
+    .legend span {
+        position: relative;
+        bottom: 3px;
+    }
+
+    .legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin: 0 8px 0 0;
+        opacity: 0.9;
+    }
+
+    .legend i.icon {
+        background-size: 18px;
+        background-color: rgba(255, 255, 255, 1);
+    }
+
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+.line {
+  stroke: url(#swell_gradient);
+  stroke-width: 1.5;
+  fill : url(#swell_gradient);
+  opacity : 0.4;
+}
+
+
+</style>
+
+<div class = container style = "max-width:70em">
+    <br>
+    <h4>Welcome to Vis.Report</h4> 
+    <p>For most dive sites you want low swell and easterly winds. If the graph is green, it will be nice.</p>
+    
+    <!-- Load d3.js -->
+
+
+<!-- Create a div where the graph will take place -->
+<div style = 'overflow-x: scroll; width: 100%;' >
+<div id="wind_plot"></div>
+</div>
+    <p>
+    <small class="text-muted">Guide: <span style="color:green">green good,</span> <span style="color:red">red bad.</span> Arrows wind, line swell. Tap graph for more. <a class="link-secondary" href = "{%url 'detail_site' 'MET'%}">This is the weather for Mettams Pool.</a></small></span><br>
+    </p>
+
+    <p>Underwater visibilty is harder to predict. Here's what divers have reported this week:</p>
+
+    <div class="table-responsive">
+
+        <table class="table table-borderless caption-top ">
+            <thead>
+              <tr>
+                <th scope="col">Date/Time</th>
+                <th scope="col">Site</th>
+                <th class="d-none d-lg-table-cell" scope="col">Visibility (m)</th>
+                <th class="d-lg-none" scope="col">Vis (m)</th>
+                <th scope="col">Conditions</th>
+                <th scope="col">Comment</th>
+                <th class="d-none d-lg-table-cell" scope="col">Reported by</th>
+                <th class="d-lg-none" scope="col">User</th>
+              </tr>
+              </tr>
+            </thead>
+            <tbody>
+        
+              {% for report in object_list %}
+              {%if report.visibility > 15.9%}
+              <tr class="table-primary">
+                {%elif report.visibility > 7.9%}
+              <tr class="table-success">
+                {%elif report.visibility > 2.9%}
+              <tr class="table-warning">
+                {%else%}
+              <tr class="table-danger">
+                {%endif%}
+                <th scope='row' class="d-none d-lg-table-cell" scope="col">{{report.date}}</th>
+                <th scope='row' class="d-lg-none" scope="col">{{ report.date|date:"j-M-y" }}   {{ report.date|time:"g a" }}</th>
+                <td><a style="color:black; text-decoration:none" onmouseover="style='text-decoration:underline'" onmouseout="style='text-decoration:none;color:black;'" href = "{%url 'detail_site' report.site.slug%}">{{report.site.name}} <small><i>({{report.site.slug}})</small></i></a></td>
+                <td>{{report.visibility }}</td>
+                <td>{{report.conditions }}</td>
+                <td>{%if report.comments%}{{report.comments }}{%else%}-{%endif%}
+
+                </td>
+                <td>@{{report.user}}
+                    {%if report.user.username == user.username%}
+                    <a href="javascript:
+                    {
+                        if (confirm('Delete report on {{report.date}}?')) {
+                            document.getElementById('delete-{{report.pk}}').submit()
+                          } 
+                    }" style='text-decoration: none;'>🗑️</a>
+                    <form id="delete-{{report.pk}}" method="POST" action="{% url 'delete_report' report.pk%}">
+                      {%csrf_token%}
+                      <input type="hidden">
+                    </form>
+                    {%endif%}
+                </td>
+              </tr>
+              {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Tap the bubbles for more information, then tap the popup text to see site details. You can also add your own.</p>
+
+        <div id="map"></div>
+
+</div>
+
+<script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 40, bottom: 30, left: 60},
+        width = 700 - margin.left - margin.right,
+        height = 200 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#wind_plot")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+    
+    
+    var wind_data = d3.csv("{%url 'weather_csv' "MET" %}").then((data) => {
+    
+    var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
+    
+    var dates = [];
+    for (let obj of data) {
+      dates.push(parseTime(obj.time));
+    }
+    
+    var domain = d3.extent(dates);
+    
+    var wind_colours = d3.scaleOrdinal()
+        .domain([0, 1, 2])
+        .range(['green', 'orange', 'red']);
+    
+    // gridlines in x axis function
+    function make_x_gridlines() {		
+        return d3.axisBottom(x)
+            .ticks(10)
+    }
+    
+    // gridlines in y axis function
+    function make_y_gridlines() {		
+        return d3.axisLeft(y)
+            .ticks(5)
+    }
+    
+    var x = d3.scaleTime()
+      .domain(domain)
+      .range([ 0, width ]);
+    
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+    
+     var y = d3.scaleLinear()
+        .domain([0, 30])
+        .range([ height, 0]);
+        
+      svg.append("g")
+        .call(d3.axisLeft(y)
+        .ticks(5));
+        
+     var y1 = d3.scaleLinear()
+        .domain([0, 6])
+        .range([ height, 0]);
+        
+          // add the X gridlines
+      svg.append("g")			
+          .attr("class", "grid")
+          .attr("transform", "translate(0," + height + ")")
+          .call(make_x_gridlines()
+              .tickSize(-height)
+              .tickFormat("")
+          )
+    
+      // add the Y gridlines
+      svg.append("g")			
+          .attr("class", "grid")
+          .call(make_y_gridlines()
+              .tickSize(-width)
+              .tickFormat("")
+          )
+    
+        
+    svg.append("g")
+    .attr("transform", "translate(600,0)")
+    .call(d3.axisRight(y1).ticks(5));
+    
+    svg.append("linearGradient")
+        .attr("id", "swell_gradient")
+        .attr("gradientUnits", "userSpaceOnUse")
+        .attr("x1", 0)
+        .attr("x2", width)
+      .selectAll("stop")
+      .data(data)
+      .join("stop")
+        .attr("offset", d => x(parseTime(d.time)) / width)
+        .attr("stop-color", d => wind_colours(parseInt(d.swell_score)));
+        
+      svg.append("path")
+          .datum(data)
+          .attr("class", "line")
+          .attr("stroke-width", 1.5)
+          .attr("d", d3.area()
+            .x(function(d) { return x(parseTime(d.time)) })
+            .y0(y(0))
+            .y1(function(d) { return y(d.swell*5) })
+            ) 
+            
+            
+        svg.append("text")
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .style("font-size", "14px")
+        .attr("y", 6)
+        .attr("dy", "-2.2em")
+        .attr("transform", "rotate(-90)")
+        .text("wind (knots)");
+        
+        svg.append("text")
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .style("font-size", "14px")
+        .attr("y", 6)
+        .attr("dy", "590")
+        .attr("transform", "rotate(-90)")
+        .text("swell (m)");
+      
+          
+      d3.select('g')
+        .selectAll('path')
+        .data(data)
+        .enter()
+        .append('path')
+        .attr('transform', function(d) {
+            return 'translate(' + x(parseTime(d.time)) + ','+y(d.wind) +' ) rotate(' + d.wind_dir + ')';
+        })
+        .attr('d', "M2.2 0 0 6.6 0 6.6 0 6.6-2.2 0-5.5-6.6 0-4.4 5.5-6.6Z")
+        .style("fill", function(d) {return wind_colours(parseInt(d.wind_score));})
+        .style("opacity", 0.7)
+    
+    
+        
+        var Tooltip = d3.select("#wind_plot")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip text-center")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("height", "0px")
+        .style("border-width", "1px")
+        .style("border-color", "#343a40")
+        .style("border-radius", "5px")
+        .style("padding", "6px")
+        .style("top", "0px")
+        .style("left", "0px")
+    
+        const formatTime = d3.timeFormat("%a %I:00 %p");
+    
+            var mouseover = function(event, a) {
+                Tooltip
+                .style("opacity", .90)
+                .style("min-width", "130px")
+                .style("height", "80px")
+                .html("<b>" + formatTime(parseTime(a.time))+
+                    '</b><span style="color:' + wind_colours(parseInt(a.wind_score))+ '">' +
+                    '<br>Wind: '+ a.wind + 'kn ' + a.wind_dir_text +
+                    '</span><span style="color:' + wind_colours(parseInt(a.swell_score))+ '">' +
+                  '<br>Swell: ' + a.swell + 'm ' + a.swell_dir_text + '</span>')
+                .style("top", event.pageY-100 + "px")
+                .style("left", event.pageX-60 + "px")
+                d3.select(event.currentTarget)
+                .style("stroke", wind_colours(parseInt(a.total_score)))
+                .style("fill", wind_colours(parseInt(a.total_score)))
+                .style("opacity", .25)
+            }
+            var mouseleave = function(d) {
+                Tooltip
+                .style("opacity", 0)
+                d3.select(this)
+                .style("stroke", "none")
+                .style("fill", "none")
+                .style("opacity", 0.8)
+            }
+    
+        svg.append("g")
+          .attr("fill", "None")
+          .attr("pointer-events", "all")
+        .selectAll("rect")
+        .data(d3.pairs(data))
+        .join("rect")
+          .attr("x", ([a, b]) => x(parseTime(a.time)))
+          .attr("height", height)
+          .attr("width", ([a, b]) => x(parseTime(b.time)) - x(parseTime(a.time)))
+          .on("mouseover", (event, [a]) => mouseover(event, a))
+          .on("mouseout", mouseleave)
+    
+    
+    })
+    
+    </script>
+
+<script>
+    var map = L.map('map', {
+        tap: false,
+        renderer: L.canvas({ tolerance: 9 })
+    }).setView([-32.00,115.60], 10);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 17
+    }).addTo(map);
+
+
+    function getColor(v) {
+        return v > 15.9 ? '#0275d8' :
+            v > 7.9 ? '#5cb85c' :
+                v > 2.9 ? '#f0ad4e' :
+                    v > -0.1 ? '#d9534f' :
+                        '#868e96';
+    }
+    var legend = L.control({ position: "bottomleft" });
+
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create("div", "legend");
+        //div.innerHTML += "<h4>Scale</h4>";
+        div.innerHTML += '<i style="background: #d9534f"></i><span>&lt; 3 m</span><br>';
+        div.innerHTML += '<i style="background: #f0ad4e"></i><span>3-8m</span><br>';
+        div.innerHTML += '<i style="background: #5cb85c"></i><span>8-15m</span><br>';
+        div.innerHTML += '<i style="background: #0275d8"></i><span>15-25m</span><br>';
+        div.innerHTML += '<i style="background: #868e96"></i><span>No recent</span><br>';
+        return div;
+    };
+    legend.addTo(map);
+
+    function geojsonMarkerOptions(feature) {
+        if (feature.properties.last_report.recent == 'True') {
+            return {
+                radius: 16,
+                fillColor: getColor(feature.properties.last_report.visibility),
+                color: "white",
+                weight: 0,
+                opacity: .9,
+                fillOpacity: 1,
+            };
+        } else {
+            return {
+                radius: 16,
+                fillColor: getColor(feature.properties.last_report.visibility),
+                color: "#000",
+                weight: 1,
+                opacity: 0.1,
+                fillOpacity: 0.3,
+            };
+        }
+    }
+
+    function visText(report) {
+        if (report.recent != 'None') {
+            return "<span style = 'color:" + getColor(report.visibility) + ";'>" +
+                "<u>" + report.since + "</u></br>" +
+                report.visibility + "m" +  " reported  by @" + report.username + "</span>"
+        } else {
+            return "<p> No recent reports.</p>"
+        }
+    }
+
+    function popupText(layer) {
+        return "<a style='line-height: .6; color:white; text-decoration: none;' href ='" + layer.feature.id + "'>" +
+            "<h5><i>" + layer.feature.properties.name + "</i></h5>" +
+            visText(layer.feature.properties.last_report) +
+            "<p style = 'color:#777d80'><small>Click here for more.</small></p></a>"
+    }
+
+    var sites = new L.geoJSON("", {
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, geojsonMarkerOptions(feature));
+    }, onEachFeature: function (feature, layer) {
+        layer.bindPopup(popupText,{ maxWidth: 230, className: 'text', closeOnClick: true, closeButton: false, direction: 'top',});
+        layer.bindTooltip(function (layer) {return layer.feature.id;},{direction: 'center', className: 'label', permanent: 'true'} );
+    }});
+
+    sites.addTo(map);
+    L.control.locate({
+        locateOptions: {
+            maxZoom: 10,
+            enableHighAccuracy: false
+        }
+    }).addTo(map);
+
+    $.ajax({
+        dataType: "json",
+        url: "{% url 'sites_display_geojson'%}",
+        success: function (data) {
+            $(data.features).each(function (key, data) {
+                sites.addData(data);
+            });
+        }
+    }).error(function () { });
+
+    sites.on("data:loaded",function(){
+      map.openTooltip();
+});
+
+</script>
+
+{% endblock %}

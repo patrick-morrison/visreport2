@@ -24,6 +24,7 @@ urlpatterns = [
     path('', views.home, name = 'home'),
     path('about', views.about, name = 'about'),
     path('list', views.list_reports.as_view(), name = 'list'),
+    path('guide', views.guide.as_view(), name = 'guide'),
     path('<slug:slug>', views.detail_site.as_view(), name = 'detail_site'),
     path('sites.json', views.sites_json.as_view(), name='sites_json'),
     path('reports.json', views.reports_json, name='reports_json'),
