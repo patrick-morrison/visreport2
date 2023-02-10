@@ -117,7 +117,7 @@
 
                 <ul>
                 {% for report in object_list %}
-                <li><b>{{report.since}}</b>:
+                <li>
                     {%if report.visibility > 15.9%}
                     <span class="text-primary">
                 {%elif report.visibility > 7.9%}
@@ -127,10 +127,10 @@
                 {%else%}
                 <span class="text-danger">
                 {%endif%}
-                         {{report.visibility }}m and {{report.conditions }} </span> at
+                <b>{{report.visibility }}m and {{report.conditions }} </b></span> at
                      <a style="color:black; text-decoration:none" onmouseover="style='text-decoration:underline'" onmouseout="style='text-decoration:none;color:black;'" href = "{%url 'detail_site' report.site.slug%}">{{report.site.name}} <small><i>({{report.site.slug}})
                      </small></i></a>
-                    - @{{report.user}}</li>
+                    - @{{report.user}} {{report.since}}</li>
                 {% endfor %}
                     </ul>
         <p><a class="link-dark" href = "{%url 'list'%}">See the full list here</a>, or view <a class="link-dark" href = "{%url 'home'%}">the map</a> below.</p>
