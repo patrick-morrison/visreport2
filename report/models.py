@@ -76,6 +76,9 @@ class Report(models.Model):
 
     def __str__(self):
         return str(self.date.strftime("%Y-%m-%d-%H")) +"_"+ self.site.slug + "_by_"+ self.user.username
+    @property
+    def since(self):
+        return str(naturaltime(self.date))
     class Meta:
         ordering = ('-date',)
 

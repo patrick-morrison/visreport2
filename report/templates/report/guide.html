@@ -115,60 +115,25 @@
 
     <div class="table-responsive">
 
-        <table class="table table-borderless caption-top ">
-            <thead>
-              <tr>
-                <th scope="col">Date/Time</th>
-                <th scope="col">Site</th>
-                <th class="d-none d-lg-table-cell" scope="col">Visibility (m)</th>
-                <th class="d-lg-none" scope="col">Vis (m)</th>
-                <th scope="col">Conditions</th>
-                <th scope="col">Comment</th>
-                <th class="d-none d-lg-table-cell" scope="col">Reported by</th>
-                <th class="d-lg-none" scope="col">User</th>
-              </tr>
-              </tr>
-            </thead>
-            <tbody>
-        
-              {% for report in object_list %}
-              {%if report.visibility > 15.9%}
-              <tr class="table-primary">
+                <ul>
+                {% for report in object_list %}
+                <li><b>{{report.since}}</b>:
+                    {%if report.visibility > 15.9%}
+                    <span class="text-primary">
                 {%elif report.visibility > 7.9%}
-              <tr class="table-success">
+                <span class="text-success">
                 {%elif report.visibility > 2.9%}
-              <tr class="table-warning">
+                <span class="text-warning">
                 {%else%}
-              <tr class="table-danger">
+                <span class="text-danger">
                 {%endif%}
-                <th scope='row' class="d-none d-lg-table-cell" scope="col">{{report.date}}</th>
-                <th scope='row' class="d-lg-none" scope="col">{{ report.date|date:"j-M-y" }}   {{ report.date|time:"g a" }}</th>
-                <td><a style="color:black; text-decoration:none" onmouseover="style='text-decoration:underline'" onmouseout="style='text-decoration:none;color:black;'" href = "{%url 'detail_site' report.site.slug%}">{{report.site.name}} <small><i>({{report.site.slug}})</small></i></a></td>
-                <td>{{report.visibility }}</td>
-                <td>{{report.conditions }}</td>
-                <td>{%if report.comments%}{{report.comments }}{%else%}-{%endif%}
-
-                </td>
-                <td>@{{report.user}}
-                    {%if report.user.username == user.username%}
-                    <a href="javascript:
-                    {
-                        if (confirm('Delete report on {{report.date}}?')) {
-                            document.getElementById('delete-{{report.pk}}').submit()
-                          } 
-                    }" style='text-decoration: none;'>🗑️</a>
-                    <form id="delete-{{report.pk}}" method="POST" action="{% url 'delete_report' report.pk%}">
-                      {%csrf_token%}
-                      <input type="hidden">
-                    </form>
-                    {%endif%}
-                </td>
-              </tr>
-              {% endfor %}
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                         {{report.visibility }}m and {{report.conditions }} </span> at
+                     <a style="color:black; text-decoration:none" onmouseover="style='text-decoration:underline'" onmouseout="style='text-decoration:none;color:black;'" href = "{%url 'detail_site' report.site.slug%}">{{report.site.name}} <small><i>({{report.site.slug}})
+                     </small></i></a>
+                    - @{{report.user}}</li>
+                {% endfor %}
+                    </ul>
+        <p><a class="link-dark" href = "{%url 'list'%}">See the full list here</a>, or view <a class="link-dark" href = "{%url 'home'%}">the map</a> below.</p>
 
         <p>Tap the bubbles for more information, then tap the popup text to see site details. You can also add your own.</p>
 
@@ -193,7 +158,7 @@
               "translate(" + margin.left + "," + margin.top + ")");
     
     
-    var wind_data = d3.csv("{%url 'weather_csv' "MET" %}").then((data) => {
+    var wind_data = d3.csv("{%url 'weather_csv' "met" %}").then((data) => {
     
     var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
     
