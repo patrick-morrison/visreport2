@@ -93,12 +93,35 @@ def weather_csv(request, slug):
 
     swell = weather['swell'].apply(swell_calc, marginal=site_weather.swell_marginal, max = site_weather.swell_max)
 
+    def week_describe(when):
+        def time_of_day(dt):
+            hour = dt.hour
+            day = when.strftime('%A')
+            if 6 <= hour < 11:
+                return f"{day} morning"
+            elif 12 <= hour < 13:
+                return f"{day} lunchtime"
+            elif 14 <= hour < 16:
+                return f"{day} afternoon"
+            elif 17 <= hour < 20:
+                return f"{day} evening"
+            else:
+                return "NA"
+
+        when = datetime.strptime(when, "%Y-%m-%d %H:%M:%S")
+        time = time_of_day(when)
+
+        return time
+
+    weekday = weather['dateTime'].apply(week_describe)
+
     def cap(n):
         return min(n, 2)
 
     scores = pd.DataFrame({
         'time': weather['dateTime'],
         'swell': weather['swell'],
+        'weekday' : weekday,
         'swell_dir_text' : weather['swell_dir_text'],
         'wind': (weather['wind']*0.54).round(decimals = 1),
         'wind_dir': weather['wind_dir'],

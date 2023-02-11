@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"
         charset="utf-8"></script>
-        <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
 <style> /* set the CSS */
@@ -99,6 +99,7 @@
     <br>
     <h4>Welcome to Vis.Report</h4> 
     <p>For most dive sites you want low swell and easterly winds. If the graph is green, it will be nice.</p>
+    <div id="best_times"></div>
     
     <!-- Load d3.js -->
 
@@ -139,9 +140,11 @@
 
         <div id="map"></div>
 
+
 </div>
 
 <script>
+    
 
     // set the dimensions and margins of the graph
     var margin = {top: 10, right: 40, bottom: 30, left: 60},
@@ -335,7 +338,27 @@
           .attr("width", ([a, b]) => x(parseTime(b.time)) - x(parseTime(a.time)))
           .on("mouseover", (event, [a]) => mouseover(event, a))
           .on("mouseout", mouseleave)
-    
+
+          scores_times = d3.filter(data, function(d){return d.weekday!='NA'})
+          scores_by_day = d3.rollup(scores_times, v => d3.mean(v, d => d.total_score), d => d.weekday)
+          best_day = d3.least(d3.group(scores_times, d => d.weekday), ([, v]) => d3.mean(v, d => d.total_score))
+          var good_days = new Map(
+            [...scores_by_day].filter(([k, v]) => v < 1 )).keys();
+            good_days = Array.from(good_days)
+
+          if (good_days.length == 0) {
+            description_string = "Not a great week, but " + best_day[0]  + " is your best bet."
+            } else if (good_days.length == 1) {
+                description_string = good_days[0] +" is looking good!"
+            } else if (good_days.length == 2) {
+                description_string = good_days[0] + " and " + good_days[1]+ " are looking good!"
+            } else if (good_days.length == 3) {
+                description_string = good_days[0] + ", " + good_days[1] + " & " + good_days[2] + " are looking good!"
+            } else {
+                description_string = good_days[0] + ", " + good_days[1] + ", " + good_days[2] + " & " + good_days[3] + " are looking good!"
+            }
+
+          d3.select('#best_times').append('p').text(description_string);
     
     })
     

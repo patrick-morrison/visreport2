@@ -16,6 +16,7 @@
 {% include "weather/site_weather_display.html" %} 
 <p>
 <small class="text-muted">Guide: <span style="color:green">green good,</span> <span style="color:red">red bad.</span> Arrows wind, line swell.</small></span><br>
+<div id="best_times"></div>
 <a href="{%url 'siteweatheredit' site.weather.slug %}" class="btn btn-success btn-sm">Click here to see weather details</a>
 </p>
 {%endif%}
