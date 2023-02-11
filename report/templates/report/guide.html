@@ -98,7 +98,7 @@
 <div class = container style = "max-width:70em">
     <br>
     <h4>Welcome to Vis.Report</h4> 
-    <p>For most dive sites you want low swell and easterly winds. If the graph is green, it will be nice.</p>
+    <p>For most Perth dive sites you want low swell and easterly winds. If the graph is green, it will be nice.</p>
     <div id="best_times"></div>
     
     <!-- Load d3.js -->
@@ -136,7 +136,10 @@
                     </ul>
         <p><a class="link-dark" href = "{%url 'list'%}">See the full list here</a>, or view <a class="link-dark" href = "{%url 'home'%}">the map</a> below.</p>
 
-        <p>Tap the bubbles for more information, then tap the popup text to see site details. You can also add your own.</p>
+        <p>Tap the bubbles for more information, then tap the popup text to see site details and vis reports.
+            {% if user.is_authenticated == False %}
+              <a class="link-success" href="{%url 'login'%}">Log in to make your own reports.</a>
+            {% endif %}</p>
 
         <div id="map"></div>
 
