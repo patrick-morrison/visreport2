@@ -97,7 +97,10 @@
 
 <div class = container style = "max-width:70em">
     <br>
-    <h4>Welcome to Vis.Report</h4> 
+    <h4>Welcome to Vis.Report</h4>
+    {% if request.user.username == 'AlecZander' %}
+    <p><b>Alec don't forget your jumper and wetsuit!!</b></p>
+    {%endif%} 
     <p>For most Perth dive sites you want low swell and easterly winds. If the graph is green, it will be nice.</p>
     <div id="best_times"></div>
     
