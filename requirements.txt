@@ -27,7 +27,7 @@ django-widget-tweaks==1.4.12
 entrypoints==0.4
 et-xmlfile==1.1.0
 executing==1.2.0
-Fiona==1.8.20
+fiona==1.8.20
 fonttools==4.38.0
 geographiclib==2.0
 geopandas==0.12.2
