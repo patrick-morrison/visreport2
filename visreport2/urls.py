@@ -40,6 +40,6 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('account/', views.account, name='account'),
     # Custom redirect for sealrocks
-    path('sealrocks', RedirectView.as_view(url='/SLR', permanent=True)),
+    path('sealrocks', RedirectView.as_view(url='SLR', permanent=True)),
 ]
 
