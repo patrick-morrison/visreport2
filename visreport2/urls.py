@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic.base import RedirectView
 from report import views
 from weather import views as weather_views
 from report.models import Site
@@ -39,4 +40,7 @@ urlpatterns = [
     path('accounts/signup', views.SignUp.as_view(), name = 'signup'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('account/', views.account, name = 'account'),
+    # Redirects
+    path('slr', RedirectView.as_view(url='/SLR', permanent=True)),
+    path('sealrocks', RedirectView.as_view(url='/SLR', permanent=True)),
 ]
