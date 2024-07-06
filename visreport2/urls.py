@@ -41,6 +41,6 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('account/', views.account, name = 'account'),
     # Redirects
-    path('slr', RedirectView.as_view(url='/SLR', permanent=True)),
-    path('sealrocks', RedirectView.as_view(url='/SLR', permanent=True)),
+    path('slr', RedirectView.as_view(url='/SLR', permanent=False)),
+    path('sealrocks', RedirectView.as_view(url='/SLR', permanent=False)),
 ]
