@@ -9,7 +9,7 @@
 <h3>Wind rose</h3>
     <div id="windrose"></div>
 <h3>Swell guide</h3>
-{% if user.is_superuser %}
+{% if user.is_staff %}
 <form action="" method="post" onsubmit="document.getElementById('wind_button').value = d3.csvFormat(d3.selectAll('path').data());">
     {%csrf_token%}
     <div class="row" style="max-width: 330px;">
@@ -106,7 +106,7 @@ var wind_data = d3.csv("{%url 'wind_csv' siteweather.slug%}", d3.autoType).then(
       .attr("d", function (d) { return arc(d); } )
       .style("fill", function (d) { return color(d.score) } )
       .style("stroke", '#EAECEE' )
-      {% if user.is_superuser %}
+      {% if user.is_staff %}
       .on("click", updatescore)
       {% endif %}
     

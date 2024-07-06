@@ -42,6 +42,9 @@ class detail_site(FormMixin, generic.DetailView):
 class list_reports(generic.ListView):
     model = Report
     template_name = "report/list_reports.html"
+        
+    def get_queryset(self):
+        return Report.objects.exclude(site__region1='newcastle')
 
 class guide(generic.ListView):
     model = Report
@@ -49,6 +52,7 @@ class guide(generic.ListView):
     def get_queryset(self):
         seven_day_before = timezone.now() - timedelta(days=7)
         recent_reports = Report.objects.filter(date__gte=seven_day_before)
+        recent_reports = recent_reports.exclude(site__region1='newcastle')
         return recent_reports
 
 
