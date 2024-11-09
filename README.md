@@ -22,7 +22,7 @@ git clone https://github.com/PatrickMorrison1498/visreport.git
 python -m venv ENV
 source ENV/bin/activate
 pip install -r requirements.txt
-cd visreport
+cd visreport2
 python manage.py runserver
 ```
 

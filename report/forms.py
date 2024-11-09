@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, time
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from captcha.fields import ReCaptchaField
+from django_recaptcha.fields import ReCaptchaField
 
 
 class UserCreationForm(UserCreationForm):
