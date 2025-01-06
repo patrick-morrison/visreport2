@@ -5,11 +5,12 @@ from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV3
 
 
 class UserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, label='Email')
-    captcha = ReCaptchaField()
+    captcha = ReCaptchaField(widget=ReCaptchaV3)
 
     class Meta:
         model = User
