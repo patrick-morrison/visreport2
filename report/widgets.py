@@ -1,7 +1,7 @@
 from django import forms
 import json
 
-class PointFieldWidget(forms.Textarea):
+class PointFieldWidget(forms.TextInput):
     def format_value(self, value):
         if value is None:
             return ''
