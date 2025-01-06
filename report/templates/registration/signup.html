@@ -17,9 +17,7 @@
         
             {%for field in form%}
                 {{field.errors}}
-                {% if field.name != 'captcha' %}
-                    {{ field.label_tag }}
-                {% endif %}
+                {{field.label_tag}}
                 {%render_field field class='form-control'%}
         
             {%endfor%}

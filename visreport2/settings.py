@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'djgeojson',
     'widget_tweaks',
     'import_export',
-    'django_recaptcha'
+    'captcha'
 ]
 
 MIDDLEWARE = [

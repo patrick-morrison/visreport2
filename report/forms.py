@@ -4,13 +4,12 @@ from datetime import datetime, timedelta, time
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django_recaptcha.fields import ReCaptchaField
-from django_recaptcha.widgets import ReCaptchaV3
+from captcha.fields import ReCaptchaField
 
 
 class UserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, label='Email')
-    captcha = ReCaptchaField(widget=ReCaptchaV3)
+    captcha = ReCaptchaField()
 
     class Meta:
         model = User
