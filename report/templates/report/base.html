@@ -89,13 +89,18 @@
               <li><a class="dropdown-item" href="{%url 'admin:index'%}">Admin</a></li>
               {% endif %}
               <div class="dropdown-divider"></div>
-              <li><a class="dropdown-item" href="{%url 'logout'%}">Log out</a></li>
+              <li>
+                <form method="post" action="{% url 'logout' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item">Log out</button>
+                </form>
+              </li>
             </ul>
           </li>
           {% endif %}
-          {% if user.is_authenticated == False %}
+          {% if not user.is_authenticated %}
           <li class="nav-item">
-            <a class="btn btn-light" href="{%url 'login'%}">Log in</a>
+            <a class="btn btn-light" href="{% url 'login' %}">Log in</a>
           </li>
           {% endif %}
         </ul>

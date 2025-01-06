@@ -2,14 +2,13 @@ from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from weather.models import SiteWeather
+from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
-
-# Register your models here.
-from .models import *
+from .models import Site, Region, Report
+from .widgets import PointFieldWidget
 
 class RegionResource(resources.ModelResource):
-
     class Meta:
         model = Region
         import_id_fields = ('slug', )
@@ -20,7 +19,6 @@ class RegionAdmin(ImportExportModelAdmin):
 admin.site.register(Region, RegionAdmin)
 
 class SiteResource(resources.ModelResource):
-
     class Meta:
         model = Site
         import_id_fields = ('slug', )
@@ -29,7 +27,16 @@ class WeatherInline(admin.StackedInline):
     model = SiteWeather
     extra = 0
 
+class SiteAdminForm(forms.ModelForm):
+    class Meta:
+        model = Site
+        fields = '__all__'
+        widgets = {
+            'location': PointFieldWidget(),
+        }
+
 class SiteAdmin(ImportExportModelAdmin):
+    form = SiteAdminForm
     list_display = ('slug', 'name', 'date_added', 'nreports')
     inlines = [WeatherInline]
     resource_class = SiteResource
@@ -37,7 +44,6 @@ class SiteAdmin(ImportExportModelAdmin):
 admin.site.register(Site, SiteAdmin)
 
 class ReportResource(resources.ModelResource):
-
     class Meta:
         model = Report
 
