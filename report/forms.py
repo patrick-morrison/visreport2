@@ -24,14 +24,21 @@ class UserCreationForm(UserCreationForm):
 
 class DateSelectorWidget(forms.MultiWidget):
     def __init__(self, attrs=None):
+        def past_week():
+            today = datetime.now()
+            days = []
+            for i in range(7):  # Today + 6 days back
+                day_date = today - timedelta(days=i)
+                if i == 0:
+                    label = 'Today'
+                elif i == 1:
+                    label = f'Yesterday {day_date.strftime("%b. %d")}'
+                else:
+                    label = f'{day_date.strftime("%A %b. %d")}'
+                days.append((day_date.strftime('%Y-%m-%d'), label))
+            return days
 
-        def today():
-            return datetime.strftime(datetime.now(), '%Y-%m-%d')
-
-        def yesterday():
-            return datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
-
-        day = [(today,'Today'), (yesterday, "Yesterday")]
+        day = past_week()
         timeofday = [(time(i).strftime('%H'), time(i).strftime('%I %p')) for i in range(24)]
         widgets = [
             forms.Select(attrs=attrs, choices=day),
