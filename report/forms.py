@@ -32,9 +32,9 @@ class DateSelectorWidget(forms.MultiWidget):
                 if i == 0:
                     label = 'Today'
                 elif i == 1:
-                    label = f'Yesterday {day_date.strftime("%b. %d")}'
+                    label = f'Yesterday {day_date.strftime("%b %d")}'
                 else:
-                    label = f'{day_date.strftime("%A %b. %d")}'
+                    label = f'{day_date.strftime("%A %b %d")}'
                 days.append((day_date.strftime('%Y-%m-%d'), label))
             return days
 
@@ -81,7 +81,7 @@ class ReportForm(forms.ModelForm):
             return (datetime.now() - timedelta(hours = 1)).strftime('%H')
 
         def today():
-            return datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
+            return datetime.strftime(datetime.now() - timedelta(hours = 1), '%Y-%m-%d')
 
 
         self.fields['date'].initial = [today(), hour_ago()]
