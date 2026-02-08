@@ -323,6 +323,19 @@
                 .style("stroke", wind_colours(parseInt(a.total_score)))
                 .style("fill", wind_colours(parseInt(a.total_score)))
                 .style("opacity", .25)
+                if (window.trackNavigation) {
+                    window.trackNavigation(
+                        "graph_point_focus",
+                        {
+                            page: window.location.pathname,
+                            time: a.time
+                        },
+                        {
+                            throttleKey: "guide-graph-focus:" + a.time,
+                            throttleMs: 60000
+                        }
+                    );
+                }
             }
             var mouseleave = function(d) {
                 Tooltip
@@ -343,6 +356,15 @@
           .attr("height", height)
           .attr("width", ([a, b]) => x(parseTime(b.time)) - x(parseTime(a.time)))
           .on("mouseover", (event, [a]) => mouseover(event, a))
+          .on("click", (event, [a]) => {
+            mouseover(event, a);
+            if (window.trackNavigation) {
+                window.trackNavigation("graph_tap", {
+                    page: window.location.pathname,
+                    time: a.time
+                });
+            }
+          })
           .on("mouseout", mouseleave)
 
           scores_times = d3.filter(data, function(d){return d.weekday!='NA'})
@@ -448,6 +470,22 @@
     }, onEachFeature: function (feature, layer) {
         layer.bindPopup(popupText,{ maxWidth: 230, className: 'text', closeOnClick: true, closeButton: false, direction: 'top',});
         layer.bindTooltip(function (layer) {return layer.feature.id;},{direction: 'center', className: 'label', permanent: 'true'} );
+        layer.on("click", function () {
+            if (window.trackNavigation) {
+                window.trackNavigation("map_marker_click", {
+                    page: window.location.pathname,
+                    site: feature.id
+                });
+            }
+        });
+        layer.on("popupopen", function () {
+            if (window.trackNavigation) {
+                window.trackNavigation("map_popup_open", {
+                    page: window.location.pathname,
+                    site: feature.id
+                });
+            }
+        });
     }});
 
     sites.addTo(map);

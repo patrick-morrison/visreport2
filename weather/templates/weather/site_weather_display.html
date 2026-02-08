@@ -202,6 +202,20 @@ svg.append("linearGradient")
             .style("stroke", wind_colours(parseInt(a.total_score)))
             .style("fill", wind_colours(parseInt(a.total_score)))
             .style("opacity", .25)
+            if (window.trackNavigation) {
+                window.trackNavigation(
+                    "graph_point_focus",
+                    {
+                        page: window.location.pathname,
+                        site: "{{site.slug}}",
+                        time: a.time
+                    },
+                    {
+                        throttleKey: "site-weather-focus:{{site.slug}}:" + a.time,
+                        throttleMs: 60000
+                    }
+                );
+            }
         }
         var mouseleave = function(d) {
             Tooltip
@@ -222,6 +236,16 @@ svg.append("linearGradient")
       .attr("height", height)
       .attr("width", ([a, b]) => x(parseTime(b.time)) - x(parseTime(a.time)))
       .on("mouseover", (event, [a]) => mouseover(event, a))
+      .on("click", (event, [a]) => {
+        mouseover(event, a);
+        if (window.trackNavigation) {
+            window.trackNavigation("graph_tap", {
+                page: window.location.pathname,
+                site: "{{site.slug}}",
+                time: a.time
+            });
+        }
+      })
       .on("mouseout", mouseleave)
 
       scores_times = d3.filter(data, function(d){return d.weekday!='NA'})

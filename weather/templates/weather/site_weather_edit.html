@@ -95,6 +95,14 @@ var wind_data = d3.csv("{%url 'wind_csv' siteweather.slug%}", d3.autoType).then(
         
         d3.select(this)
         .style("fill", function(d) { return color(i.score); });
+        if (window.trackNavigation) {
+            window.trackNavigation("windrose_toggle", {
+                page: window.location.pathname,
+                site: "{{siteweather.slug}}",
+                direction: i.label,
+                score: i.score
+            });
+        }
     
     };
 
