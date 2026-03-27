@@ -18,6 +18,13 @@ from django.urls import include, path
 from report import views
 from weather import views as weather_views
 from django.views.generic import RedirectView
+from django.contrib.sitemaps.views import sitemap
+from report.sitemaps import StaticViewSitemap, SiteSitemap
+
+sitemaps = {
+    'static': StaticViewSitemap,
+    'sites': SiteSitemap,
+}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,5 +48,6 @@ urlpatterns = [
     path('account/', views.account, name='account'),
     # Custom redirect for sealrocks
     path('sealrocks', RedirectView.as_view(url='SLR', permanent=True)),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 ]
 
