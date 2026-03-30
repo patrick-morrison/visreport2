@@ -436,6 +436,7 @@
         ;(function() {
             var svgNode = document.querySelector('#wind_plot svg');
             function handleTouch(event) {
+                if (graphScrolled) return;
                 event.preventDefault();
                 var touch = event.touches[0];
                 var svgRect = svgNode.getBoundingClientRect();
