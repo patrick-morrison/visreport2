@@ -432,6 +432,41 @@
           })
           .on("mouseout", mouseleave)
 
+        // Touch support: thumb over chart to see tooltip
+        ;(function() {
+            var svgNode = document.querySelector('#wind_plot svg');
+            function handleTouch(event) {
+                event.preventDefault();
+                var touch = event.touches[0];
+                var svgRect = svgNode.getBoundingClientRect();
+                var xPos = touch.clientX - svgRect.left - margin.left;
+                xPos = Math.max(0, Math.min(width, xPos));
+                var time = x.invert(xPos);
+                var bisect = d3.bisector(function(d) { return parseTime(d.time); }).left;
+                var idx = bisect(data, time);
+                idx = Math.max(0, Math.min(data.length - 1, idx));
+                if (idx > 0) {
+                    var d0 = data[idx - 1], d1 = data[idx];
+                    if (time - parseTime(d0.time) < parseTime(d1.time) - time) idx--;
+                }
+                var a = data[idx];
+                Tooltip
+                    .style("opacity", .90)
+                    .style("min-width", "130px")
+                    .style("height", "80px")
+                    .html("<b>" + formatTime(parseTime(a.time)) +
+                        '</b><span style="color:' + wind_colours(parseInt(a.wind_score)) + '">' +
+                        '<br>Wind: ' + a.wind + 'kn ' + a.wind_dir_text +
+                        '</span><span style="color:' + wind_colours(parseInt(a.swell_score)) + '">' +
+                        '<br>Swell: ' + a.swell + 'm ' + a.swell_dir_text + '</span>')
+                    .style("top", (touch.clientY - 100) + "px")
+                    .style("left", (touch.clientX - 60) + "px");
+            }
+            svgNode.addEventListener('touchstart', handleTouch, { passive: false });
+            svgNode.addEventListener('touchmove', handleTouch, { passive: false });
+            svgNode.addEventListener('touchend', function() { Tooltip.style("opacity", 0); });
+        })();
+
           scores_times = d3.filter(data, function(d){return d.weekday!='NA'})
           scores_by_day = d3.rollup(scores_times, v => d3.mean(v, d => d.total_score), d => d.weekday)
           best_day = d3.least(d3.group(scores_times, d => d.weekday), ([, v]) => d3.mean(v, d => d.total_score))
@@ -598,5 +633,11 @@
 });
 
 </script>
+
+<hr>
+<p class="text-muted"><small>
+    The data behind this site is <a href="{% url 'about' %}">open for analysis</a> and can be used to explore how wind, swell, and other factors affect underwater visibility (<a href="https://padmorrison.com/posts/2021-09-05-predicting-underwater-visibility/" target="_blank">see this analysis</a>).
+    You can also see how the weather forecasting code works (<a href="https://padmorrison.com/posts/2022-04-16-visualising-weather-forecasts-for-diving-and-snorkelling/" target="_blank">see how this is coded</a>).
+</small></p>
 
 {% endblock %}
