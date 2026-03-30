@@ -1,11 +1,15 @@
-
     <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
 <!-- Create a div where the graph will take place -->
-<div style = 'overflow-x: scroll; width: 100%;' >
+<div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:6px;">
+  <button id="cb-toggle" class="btn btn-outline-secondary btn-sm" style="font-size:0.8rem; padding: 5px 12px;" onclick="toggleColorblind()">◐ Colours</button>
+  <button id="graph-toggle" class="btn btn-outline-secondary btn-sm" style="font-size:0.8rem; padding: 5px 12px;" onclick="toggleGraphView()">⇔ Fit week</button>
+</div>
+<div id="wind_plot_wrapper" style="overflow-x: scroll; width: 100%; position: relative;">
 <div id="wind_plot"></div>
 </div>
+
 <style> /* set the CSS */
 
 .grid line {
@@ -28,27 +32,97 @@
 
 </style>
 
+<script>
+var graphScrolled = localStorage.getItem('visreport-graphscroll') !== '0';
+
+function applyGraphView(scrolled) {
+    var wrapper = document.getElementById('wind_plot_wrapper');
+    var svgEl = document.querySelector('#wind_plot svg');
+    var btn = document.getElementById('graph-toggle');
+    if (!svgEl) return;
+    if (scrolled) {
+        wrapper.style.overflowX = 'scroll';
+        svgEl.style.width = '700px';
+        svgEl.style.height = '200px';
+        btn.textContent = '⇔ Fit week';
+    } else {
+        wrapper.style.overflowX = '';
+        svgEl.style.width = '100%';
+        svgEl.style.height = 'auto';
+        btn.textContent = '⇔ Scroll days';
+    }
+}
+
+function toggleGraphView() {
+    graphScrolled = !graphScrolled;
+    localStorage.setItem('visreport-graphscroll', graphScrolled ? '1' : '0');
+    applyGraphView(graphScrolled);
+}
+
+var normalPalette = ['green', 'orange', 'red'];
+var cbPalette     = ['#0077BB', '#EE7733', '#CC3311'];
+var colorblindMode = false;
+var wind_colours = d3.scaleOrdinal().domain([0, 1, 2]).range(normalPalette);
+var _graphData = null;
+var _parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
+
+function applyColorblind(cb) {
+    wind_colours.range(cb ? cbPalette : normalPalette);
+    document.getElementById('cb-toggle').textContent = cb ? '◐ Colourblind' : '◐ Colours';
+    var guide = document.getElementById('graph-guide');
+    if (guide) {
+        guide.innerHTML = cb
+            ? 'Guide: <span style="color:#0077BB">blue good,</span> <span style="color:#CC3311">red bad.</span> Arrows wind, line swell.'
+            : 'Guide: <span style="color:green">green good,</span> <span style="color:red">red bad.</span> Arrows wind, line swell.';
+    }
+    if (_graphData) {
+        d3.selectAll('.wind-arrow')
+            .style("fill", function(d) { return wind_colours(parseInt(d.wind_score)); });
+        d3.selectAll('#swell_gradient stop')
+            .attr("stop-color", function(d) { return wind_colours(parseInt(d.swell_score)); });
+    }
+}
+
+function toggleColorblind() {
+    colorblindMode = !colorblindMode;
+    localStorage.setItem('visreport-colorblind', colorblindMode ? '1' : '0');
+    applyColorblind(colorblindMode);
+}
+
+// Restore saved preference
+if (localStorage.getItem('visreport-colorblind') === '1') {
+    colorblindMode = true;
+    applyColorblind(true);
+}
+</script>
+
 
 <script>
 
 // set the dimensions and margins of the graph
-var margin = {top: 10, right: 40, bottom: 30, left: 60},
+var margin = {top: 10, right: 25, bottom: 30, left: 60},
     width = 700 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
 var svg = d3.select("#wind_plot")
   .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("viewBox", "0 0 700 200")
+    .style("width", "700px")
+    .style("height", "200px")
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
 
+// Apply saved graph view once SVG exists
+document.addEventListener('DOMContentLoaded', function() { applyGraphView(graphScrolled); });
+
 var wind_data = d3.csv("{%url 'weather_csv' site.weather.slug %}").then((data) => {
 
-var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
+_graphData = data;
+
+var parseTime = _parseTime;
 
 var dates = [];
 for (let obj of data) {
@@ -57,18 +131,14 @@ for (let obj of data) {
 
 var domain = d3.extent(dates);
 
-var wind_colours = d3.scaleOrdinal()
-    .domain([0, 1, 2])
-    .range(['green', 'orange', 'red']);
-
 // gridlines in x axis function
-function make_x_gridlines() {		
+function make_x_gridlines() {
     return d3.axisBottom(x)
         .ticks(10)
 }
 
 // gridlines in y axis function
-function make_y_gridlines() {		
+function make_y_gridlines() {
     return d3.axisLeft(y)
         .ticks(5)
 }
@@ -84,17 +154,17 @@ svg.append("g")
  var y = d3.scaleLinear()
     .domain([0, 30])
     .range([ height, 0]);
-    
+
   svg.append("g")
     .call(d3.axisLeft(y)
     .ticks(5));
-    
+
  var y1 = d3.scaleLinear()
     .domain([0, 6])
     .range([ height, 0]);
-    
+
       // add the X gridlines
-  svg.append("g")			
+  svg.append("g")
       .attr("class", "grid")
       .attr("transform", "translate(0," + height + ")")
       .call(make_x_gridlines()
@@ -103,16 +173,16 @@ svg.append("g")
       )
 
   // add the Y gridlines
-  svg.append("g")			
+  svg.append("g")
       .attr("class", "grid")
       .call(make_y_gridlines()
           .tickSize(-width)
           .tickFormat("")
       )
 
-    
+
 svg.append("g")
-.attr("transform", "translate(600,0)")
+.attr("transform", "translate(" + width + ",0)")
 .call(d3.axisRight(y1).ticks(5));
 
 svg.append("linearGradient")
@@ -125,7 +195,7 @@ svg.append("linearGradient")
   .join("stop")
     .attr("offset", d => x(parseTime(d.time)) / width)
     .attr("stop-color", d => wind_colours(parseInt(d.swell_score)));
-    
+
   svg.append("path")
       .datum(data)
       .attr("class", "line")
@@ -134,18 +204,18 @@ svg.append("linearGradient")
         .x(function(d) { return x(parseTime(d.time)) })
         .y0(y(0))
         .y1(function(d) { return y(d.swell*5) })
-        ) 
-        
-        
+        )
+
+
     svg.append("text")
     .attr("class", "y label")
     .attr("text-anchor", "end")
-    .style("font-size", "14px")
+    .style("font-size", "13px")
     .attr("y", 6)
-    .attr("dy", "-2.2em")
+    .attr("dy", "-3.2em")
     .attr("transform", "rotate(-90)")
     .text("wind (knots)");
-    
+
     svg.append("text")
     .attr("class", "y label")
     .attr("text-anchor", "end")
@@ -154,13 +224,14 @@ svg.append("linearGradient")
     .attr("dy", "590")
     .attr("transform", "rotate(-90)")
     .text("swell (m)");
-  
-      
+
+
   d3.select('g')
 	.selectAll('path')
 	.data(data)
 	.enter()
 	.append('path')
+	.attr('class', 'wind-arrow')
 	.attr('transform', function(d) {
 		return 'translate(' + x(parseTime(d.time)) + ','+y(d.wind) +' ) rotate(' + d.wind_dir + ')';
 	})
@@ -169,20 +240,19 @@ svg.append("linearGradient")
     .style("opacity", 0.7)
 
 
-    
+
     var Tooltip = d3.select("#wind_plot")
     .append("div")
     .style("opacity", 0)
     .attr("class", "tooltip text-center")
+    .style("position", "fixed")
+    .style("pointer-events", "none")
     .style("background-color", "white")
     .style("border", "solid")
-    .style("height", "0px")
     .style("border-width", "1px")
     .style("border-color", "#343a40")
     .style("border-radius", "5px")
     .style("padding", "6px")
-    .style("top", "0px")
-    .style("left", "0px")
 
     const formatTime = d3.timeFormat("%a %I:00 %p");
 
@@ -196,8 +266,8 @@ svg.append("linearGradient")
                 '<br>Wind: '+ a.wind + 'kn ' + a.wind_dir_text +
                 '</span><span style="color:' + wind_colours(parseInt(a.swell_score))+ '">' +
               '<br>Swell: ' + a.swell + 'm ' + a.swell_dir_text + '</span>')
-            .style("top", event.pageY-100 + "px")
-            .style("left", event.pageX-60 + "px")
+            .style("top", event.clientY-100 + "px")
+            .style("left", event.clientX-60 + "px")
             d3.select(event.currentTarget)
             .style("stroke", wind_colours(parseInt(a.total_score)))
             .style("fill", wind_colours(parseInt(a.total_score)))

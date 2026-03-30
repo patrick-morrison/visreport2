@@ -108,11 +108,15 @@
 
 
 <!-- Create a div where the graph will take place -->
-<div style = 'overflow-x: scroll; width: 100%;' >
+<div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:6px;">
+  <button id="cb-toggle" class="btn btn-outline-secondary btn-sm" style="font-size:0.8rem; padding:5px 12px;" onclick="toggleColorblind()">◐ Colours</button>
+  <button id="graph-toggle" class="btn btn-outline-secondary btn-sm" style="font-size:0.8rem; padding:5px 12px;" onclick="toggleGraphView()">⇔ Fit week</button>
+</div>
+<div id="wind_plot_wrapper" style="overflow-x:scroll; width:100%;">
 <div id="wind_plot"></div>
 </div>
     <p>
-    <small class="text-muted">Guide: <span style="color:green">green good,</span> <span style="color:red">red bad.</span> Arrows wind, line swell. Tap graph for more. <a class="link-secondary" href = "{%url 'detail_site' 'MET'%}">This is the weather for Mettams Pool.</a></small></span><br>
+    <small class="text-muted" id="graph-guide">Guide: <span style="color:green">green good,</span> <span style="color:red">red bad.</span> Arrows wind, line swell. Tap graph for more. <a class="link-secondary" href="{%url 'detail_site' 'MET'%}">This is the weather for Mettams Pool.</a></small><br>
     </p>
 
     <p>Underwater visibility is harder to predict. Here's what divers have reported this week:</p>
@@ -135,6 +139,8 @@
                      <a style="color:black; text-decoration:none" onmouseover="style='text-decoration:underline'" onmouseout="style='text-decoration:none;color:black;'" href = "{%url 'detail_site' report.site.slug%}">{{report.site.name}} <small><i>({{report.site.slug}})
                      </small></i></a>
                     - @{{report.user}} {{report.since}}</li>
+                {% empty %}
+                <li><span class="text-muted">No reports this week.</span></li>
                 {% endfor %}
                     </ul>
         <p><a class="link-dark" href = "{%url 'list'%}">See the full list here</a>, or view <a class="link-dark" href = "{%url 'home'%}">the map</a> below.</p>
@@ -152,35 +158,94 @@
 <script>
     
 
+    var graphScrolled = localStorage.getItem('visreport-graphscroll') !== '0';
+
+    function applyGraphView(scrolled) {
+        var wrapper = document.getElementById('wind_plot_wrapper');
+        var svgEl = document.querySelector('#wind_plot svg');
+        var btn = document.getElementById('graph-toggle');
+        if (!svgEl) return;
+        if (scrolled) {
+            wrapper.style.overflowX = 'scroll';
+            svgEl.style.width = '700px';
+            svgEl.style.height = '200px';
+            btn.textContent = '⇔ Fit week';
+        } else {
+            wrapper.style.overflowX = '';
+            svgEl.style.width = '100%';
+            svgEl.style.height = 'auto';
+            btn.textContent = '⇔ Scroll days';
+        }
+    }
+
+    function toggleGraphView() {
+        graphScrolled = !graphScrolled;
+        localStorage.setItem('visreport-graphscroll', graphScrolled ? '1' : '0');
+        applyGraphView(graphScrolled);
+    }
+
     // set the dimensions and margins of the graph
-    var margin = {top: 10, right: 40, bottom: 30, left: 60},
+    var margin = {top: 10, right: 25, bottom: 30, left: 60},
         width = 700 - margin.left - margin.right,
         height = 200 - margin.top - margin.bottom;
-    
+
     // append the svg object to the body of the page
     var svg = d3.select("#wind_plot")
       .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("viewBox", "0 0 700 200")
+        .style("width", "700px")
+        .style("height", "200px")
       .append("g")
         .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")");
+
+    document.addEventListener('DOMContentLoaded', function() { applyGraphView(graphScrolled); });
     
     
+    var normalPalette = ['green', 'orange', 'red'];
+    var cbPalette     = ['#0077BB', '#EE7733', '#CC3311'];
+    var colorblindMode = localStorage.getItem('visreport-colorblind') === '1';
+    var wind_colours = d3.scaleOrdinal().domain([0, 1, 2]).range(colorblindMode ? cbPalette : normalPalette);
+    var _graphData = null;
+
+    function applyColorblind(cb) {
+        wind_colours.range(cb ? cbPalette : normalPalette);
+        document.getElementById('cb-toggle').textContent = cb ? '◐ Colourblind' : '◐ Colours';
+        var guide = document.getElementById('graph-guide');
+        if (guide) {
+            guide.innerHTML = cb
+                ? 'Guide: <span style="color:#0077BB">blue good,</span> <span style="color:#CC3311">red bad.</span> Arrows wind, line swell. Tap graph for more. <a class="link-secondary" href="{%url 'detail_site' 'MET'%}">This is the weather for Mettams Pool.</a>'
+                : 'Guide: <span style="color:green">green good,</span> <span style="color:red">red bad.</span> Arrows wind, line swell. Tap graph for more. <a class="link-secondary" href="{%url 'detail_site' 'MET'%}">This is the weather for Mettams Pool.</a>';
+        }
+        if (_graphData) {
+            d3.selectAll('.wind-arrow')
+                .style("fill", function(d) { return wind_colours(parseInt(d.wind_score)); });
+            d3.selectAll('#swell_gradient stop')
+                .attr("stop-color", function(d) { return wind_colours(parseInt(d.swell_score)); });
+        }
+    }
+
+    function toggleColorblind() {
+        colorblindMode = !colorblindMode;
+        localStorage.setItem('visreport-colorblind', colorblindMode ? '1' : '0');
+        applyColorblind(colorblindMode);
+        // also sync map
+        if (typeof toggleMapColorblind === 'function') toggleMapColorblind();
+    }
+
+    if (colorblindMode) applyColorblind(true);
+
     var wind_data = d3.csv("{%url 'weather_csv' "met" %}").then((data) => {
-    
+
+    _graphData = data;
     var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
-    
+
     var dates = [];
     for (let obj of data) {
       dates.push(parseTime(obj.time));
     }
-    
+
     var domain = d3.extent(dates);
-    
-    var wind_colours = d3.scaleOrdinal()
-        .domain([0, 1, 2])
-        .range(['green', 'orange', 'red']);
     
     // gridlines in x axis function
     function make_x_gridlines() {		
@@ -233,7 +298,7 @@
     
         
     svg.append("g")
-    .attr("transform", "translate(600,0)")
+    .attr("transform", "translate(" + width + ",0)")
     .call(d3.axisRight(y1).ticks(5));
     
     svg.append("linearGradient")
@@ -261,9 +326,9 @@
         svg.append("text")
         .attr("class", "y label")
         .attr("text-anchor", "end")
-        .style("font-size", "14px")
+        .style("font-size", "13px")
         .attr("y", 6)
-        .attr("dy", "-2.2em")
+        .attr("dy", "-3.2em")
         .attr("transform", "rotate(-90)")
         .text("wind (knots)");
         
@@ -282,6 +347,7 @@
         .data(data)
         .enter()
         .append('path')
+        .attr('class', 'wind-arrow')
         .attr('transform', function(d) {
             return 'translate(' + x(parseTime(d.time)) + ','+y(d.wind) +' ) rotate(' + d.wind_dir + ')';
         })
@@ -295,15 +361,14 @@
         .append("div")
         .style("opacity", 0)
         .attr("class", "tooltip text-center")
+        .style("position", "fixed")
+        .style("pointer-events", "none")
         .style("background-color", "white")
         .style("border", "solid")
-        .style("height", "0px")
         .style("border-width", "1px")
         .style("border-color", "#343a40")
         .style("border-radius", "5px")
         .style("padding", "6px")
-        .style("top", "0px")
-        .style("left", "0px")
     
         const formatTime = d3.timeFormat("%a %I:00 %p");
     
@@ -317,8 +382,8 @@
                     '<br>Wind: '+ a.wind + 'kn ' + a.wind_dir_text +
                     '</span><span style="color:' + wind_colours(parseInt(a.swell_score))+ '">' +
                   '<br>Swell: ' + a.swell + 'm ' + a.swell_dir_text + '</span>')
-                .style("top", event.pageY-100 + "px")
-                .style("left", event.pageX-60 + "px")
+                .style("top", event.clientY-100 + "px")
+                .style("left", event.clientX-60 + "px")
                 d3.select(event.currentTarget)
                 .style("stroke", wind_colours(parseInt(a.total_score)))
                 .style("fill", wind_colours(parseInt(a.total_score)))
@@ -397,33 +462,55 @@
         tap: false,
         renderer: L.canvas({ tolerance: 9 })
     }).setView([-32.00,115.60], 10);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 17
+    var voyagerTile  = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    var positronTile = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    var tileAttrib = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+    var mapCbMode = localStorage.getItem('visreport-colorblind') === '1';
+
+    var baseLayer = L.tileLayer(mapCbMode ? positronTile : voyagerTile, {
+        attribution: tileAttrib, subdomains: 'abcd', maxZoom: 17
     }).addTo(map);
 
+    var normalMapColors = { bad: '#d9534f', marginal: '#f0ad4e', good: '#5cb85c', great: '#0275d8', none: '#868e96' };
+    var cbMapColors     = { bad: '#CC3311', marginal: '#EE7733', good: '#33BBEE', great: '#0077BB', none: '#868e96' };
+
+    function getColors() { return mapCbMode ? cbMapColors : normalMapColors; }
 
     function getColor(v) {
-        return v > 15.9 ? '#0275d8' :
-            v > 7.9 ? '#5cb85c' :
-                v > 2.9 ? '#f0ad4e' :
-                    v > -0.1 ? '#d9534f' :
-                        '#868e96';
+        var c = getColors();
+        return v > 15.9 ? c.great : v > 7.9 ? c.good : v > 2.9 ? c.marginal : v > -0.1 ? c.bad : c.none;
     }
-    var legend = L.control({ position: "bottomleft" });
 
-    legend.onAdd = function (map) {
-        var div = L.DomUtil.create("div", "legend");
-        //div.innerHTML += "<h4>Scale</h4>";
-        div.innerHTML += '<i style="background: #d9534f"></i><span>&lt; 3 m</span><br>';
-        div.innerHTML += '<i style="background: #f0ad4e"></i><span>3-8m</span><br>';
-        div.innerHTML += '<i style="background: #5cb85c"></i><span>8-15m</span><br>';
-        div.innerHTML += '<i style="background: #0275d8"></i><span>15-25m</span><br>';
-        div.innerHTML += '<i style="background: #868e96"></i><span>No recent</span><br>';
-        return div;
-    };
+    var legend = L.control({ position: "bottomleft" });
+    legend.onAdd = function (map) { return L.DomUtil.create("div", "legend"); };
     legend.addTo(map);
+
+    function updateLegend() {
+        var c = getColors();
+        var div = document.querySelector('.legend');
+        if (!div) return;
+        div.innerHTML  = '<i style="background:' + c.bad      + '"></i><span>&lt; 3 m</span><br>';
+        div.innerHTML += '<i style="background:' + c.marginal + '"></i><span>3-8m</span><br>';
+        div.innerHTML += '<i style="background:' + c.good     + '"></i><span>8-15m</span><br>';
+        div.innerHTML += '<i style="background:' + c.great    + '"></i><span>15-25m</span><br>';
+        div.innerHTML += '<i style="background:' + c.none     + '"></i><span>No recent</span><br>';
+    }
+    updateLegend();
+
+    function toggleMapColorblind() {
+        mapCbMode = !mapCbMode;
+        map.removeLayer(baseLayer);
+        baseLayer = L.tileLayer(mapCbMode ? positronTile : voyagerTile, {
+            attribution: tileAttrib, subdomains: 'abcd', maxZoom: 17
+        }).addTo(map);
+        baseLayer.bringToBack();
+        updateLegend();
+        sites.eachLayer(function(layer) {
+            var v = layer.feature.properties.last_report.visibility;
+            var recent = layer.feature.properties.last_report.recent == 'True';
+            layer.setStyle({ fillColor: getColor(v), color: recent ? 'white' : '#000' });
+        });
+    }
 
     function geojsonMarkerOptions(feature) {
         if (feature.properties.last_report.recent == 'True') {
